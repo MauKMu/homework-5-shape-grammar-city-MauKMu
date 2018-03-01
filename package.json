@@ -19,6 +19,7 @@
     "dat-gui": "^0.5.0",
     "gl-matrix": "^2.4.0",
     "stats-js": "^1.0.0-alpha1",
-    "sweetalert": "^2.1.0"
+    "sweetalert": "^2.1.0",
+    "webgl-obj-loader": "^1.0.0"
   }
 }
