@@ -21,6 +21,10 @@ import {LSymbol, ExpansionRule} from './l-system/LSymbol';
 import LSystem from './l-system/LSystem';
 import {lRandom, LRANDOM_MATH_RANDOM, LRANDOM_DETERMINISTIC} from './l-system/LRandom';
 
+import {GSymbol} from './l-system/GSymbol';
+//import {GCube} from './l-system/GCube';
+import {MDCube} from './l-system/MDCube';
+
 enum ShaderEnum {
     LAMBERT = 1,
     CUSTOM,
@@ -91,6 +95,10 @@ function showCurrentString() {
 }
 
 function showHelp() {
+    lsys.resetPlant();
+    lsys.expandString();
+    lsys.createPlant();
+    /*
     swal(
         "Light Position: controls the light position for shading\n\n" +
         "iterations: number of times to expand the string\n\n" + 
@@ -106,6 +114,7 @@ function showHelp() {
         "Redraw Plant: re-draws plant without modifying L-system string\n\n" +
         "Show Help: shows this help message\n\n"
     );
+    */
 }
 
 function remakePlant() {
@@ -224,6 +233,20 @@ function updateFruit(fruit: FruitEnum) {
         loadFruit(fruit);
         lastLoaded = fruit;
     }
+}
+
+function bleh() {
+    let gc1 = new MDCube("cube1", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
+    let gc2 = new MDCube("cube2", vec3.fromValues(1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
+    let gc3 = new MDCube("cube3", vec3.fromValues(1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 2));
+
+    lsys = new LSystem();
+    lsys.setAxiom([gc1, gc2, gc3]);
+
+    //lsys.expandString();
+
+    lsys.createPlant();
+    plant = lsys.plant;
 }
 
 function blah() {
@@ -789,12 +812,13 @@ function main() {
 
     // Initial call to load scene
     loadScene();
-    blah();
+    //blah();
+    bleh();
 
     // load textures
     //let pearTex = loadTexture(gl, "textures/banana.png");
 
-    const camera = new Camera(vec3.fromValues(0, 200, 450), vec3.fromValues(0, 200, 0));
+    const camera = new Camera(vec3.fromValues(0, 10, 50), vec3.fromValues(0, 8, 0));
 
     renderer = new OpenGLRenderer(canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);

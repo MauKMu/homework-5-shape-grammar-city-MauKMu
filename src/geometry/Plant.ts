@@ -7,7 +7,9 @@ const PI = 3.14159265;
 const TWO_PI = 6.283185307;
 
 export const PRISM_HEIGHT = 10;
-export const BRANCH_COLOR = vec4.fromValues(0.82353, 0.71764706, 0.60392157, 1);
+export const INV_PRISM_HEIGHT = 1 / PRISM_HEIGHT;
+//export const BRANCH_COLOR = vec4.fromValues(0.82353, 0.71764706, 0.60392157, 1);
+export const BRANCH_COLOR = vec4.fromValues(1, 0.7, 0.7, 1);
 export const TIP_COLOR = vec4.fromValues(0.1, 0.5, 0.1, 1);
 export const PEAR_COLOR = vec4.fromValues(0.7, 0.9, 0.3, 1);
 
@@ -300,6 +302,183 @@ class Plant extends Drawable {
         }
     }
 
+
+    // normals are more accurate, but has many more vertices (almost 2x)
+    addNormalCorrectPrism(transform: mat4, sides: number, scaleBottom: number, scaleTop: number, scaleHeight: number) {
+        // set up =============================================
+        let idxStart = this.stagedPositions.length / 4;
+
+        // get the inverse transpose for normals
+        let invTr = mat3.create();
+        mat3.fromMat4(invTr, transform);
+        mat3.invert(invTr, invTr);
+        mat3.transpose(invTr, invTr);
+
+        // add base ===========================================
+        // add center
+        let p = vec4.fromValues(0, 0, 0, 1);
+        vec4.transformMat4(p, p, transform);
+        appendVec4ToArray(this.stagedPositions, p);
+        appendVec4ToArray(this.stagedColors, this.currColor);
+        appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+        let n = vec3.fromValues(0, -1, 0);
+        vec3.transformMat3(n, n, invTr);
+        vec3.normalize(n, n);
+        appendNormalToArray(this.stagedNormals, n);
+
+        // add radial vertices
+        let angle = TWO_PI / sides;
+        let rotMat4 = mat4.create();
+        mat4.fromRotation(rotMat4, angle, vec3.fromValues(0, 1, 0));
+
+        let localPos = vec4.fromValues(scaleBottom, 0, 0, 1);
+
+        for (let i = 0; i < sides; i++) {
+            // transform and append position
+            vec4.transformMat4(p, localPos, transform);
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+            // append normal (already transformed when computing center)
+            appendNormalToArray(this.stagedNormals, n);
+
+            // if this is not last iteration...
+            if (i < sides - 1) {
+                // rotate local position
+                vec4.transformMat4(localPos, localPos, rotMat4);
+
+                // append indices to make faces
+                appendTri(this.stagedIndices, idxStart, idxStart + 1 + i, idxStart + 2 + i);
+            }
+            else {
+                // append indices to make faces -- edge case
+                appendTri(this.stagedIndices, idxStart, idxStart + sides, idxStart + 1);
+            }
+        }
+
+        // add top ============================================
+        // refresh idxStart
+        idxStart = this.stagedPositions.length / 4;
+        // add center
+        p = vec4.fromValues(0, PRISM_HEIGHT * scaleHeight, 0, 1);
+        vec4.transformMat4(p, p, transform);
+        appendVec4ToArray(this.stagedPositions, p);
+        appendVec4ToArray(this.stagedColors, this.currColor);
+        appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+        n = vec3.fromValues(0, 1, 0);
+        vec3.transformMat3(n, n, invTr);
+        vec3.normalize(n, n);
+        appendNormalToArray(this.stagedNormals, n);
+
+        // add radial vertices
+
+        localPos = vec4.fromValues(scaleTop, PRISM_HEIGHT * scaleHeight, 0, 1);
+
+        for (let i = 0; i < sides; i++) {
+            // transform and append position
+            vec4.transformMat4(p, localPos, transform);
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+            // append normal (already transformed when computing center)
+            appendNormalToArray(this.stagedNormals, n);
+
+            // if this is not last iteration...
+            if (i < sides - 1) {
+                // rotate local position
+                vec4.transformMat4(localPos, localPos, rotMat4);
+
+                // append indices to make faces
+                appendTri(this.stagedIndices, idxStart, idxStart + 1 + i, idxStart + 2 + i);
+            }
+            else {
+                // append indices to make faces -- edge case
+                appendTri(this.stagedIndices, idxStart, idxStart + sides, idxStart + 1);
+            }
+        }
+
+        // add sides (rectangular faces) ======================
+        // refresh idxStart
+        idxStart = this.stagedPositions.length / 4;
+
+        let rotMat3 = mat3.create();
+        mat3.fromMat4(rotMat3, rotMat4);
+
+        // localPosBot will be computed from localPosTop by setting Y = 0
+        let localPosBot = vec4.fromValues(scaleBottom, 0, 0, 1);
+        let localPosTop = vec4.fromValues(scaleTop, PRISM_HEIGHT * scaleHeight, 0, 1);
+
+        // compute initial normal by rotating by half angle
+        let halfRotMat4 = mat4.create();
+        mat4.fromRotation(halfRotMat4, angle * 0.5, vec3.fromValues(0, 1, 0));
+        let localNorVec4 = vec4.fromValues(1, 0, 0, 0);
+        vec4.transformMat4(localNorVec4, localNorVec4, halfRotMat4);
+        let localNor = vec3.fromValues(localNorVec4[0], localNorVec4[1], localNorVec4[2]);
+        // reflect about X
+        let prevLocalNor = vec3.fromValues(localNor[0], localNor[1], -localNor[2]);
+        let prevNor = vec3.create();
+        vec3.transformMat3(prevNor, prevLocalNor, invTr);
+        vec3.normalize(prevNor, prevNor);
+        
+        for (let i = 0; i < sides; i++) {
+            // append top and bottom twice to account for different normals!
+            // first copies will have "previous normal", second will have "current normal"
+
+            // transform and append position -- top
+            vec4.transformMat4(p, localPosTop, transform);
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+            // transform and append position -- bottom
+            //vec4.set(localPosBot, localPosTop[0], 0, localPosTop[2], 1);
+            vec4.transformMat4(p, localPosBot, transform);
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            appendVec4ToArray(this.stagedPositions, p);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+
+            // transform and append normal (need to append twice)
+            vec3.transformMat3(n, localNor, invTr);
+            vec3.normalize(n, n);
+            appendNormalToArray(this.stagedNormals, prevNor);
+            appendNormalToArray(this.stagedNormals, n);
+            appendNormalToArray(this.stagedNormals, prevNor);
+            appendNormalToArray(this.stagedNormals, n);
+            vec3.copy(prevNor, n);
+
+            // if this is not last iteration...
+            if (i < sides - 1) {
+                // rotate local position
+                vec4.transformMat4(localPosTop, localPosTop, rotMat4);
+                vec4.transformMat4(localPosBot, localPosBot, rotMat4);
+
+                // rotate local normal
+                vec3.transformMat3(localNor, localNor, rotMat3);
+
+                // append indices to make faces
+                // adjusts start index to account for i (# of sides added so far)
+                let adjStart = idxStart + 4 * i;
+                appendTri(this.stagedIndices, adjStart + 1, adjStart + 4, adjStart + 3);
+                appendTri(this.stagedIndices, adjStart + 3, adjStart + 4, adjStart + 6);
+            }
+            else {
+                // append indices to make faces -- edge case
+                let adjStart = idxStart + 4 * i;
+                appendTri(this.stagedIndices, adjStart + 1, idxStart, adjStart + 3);
+                appendTri(this.stagedIndices, adjStart + 3, idxStart, idxStart + 2);
+            }
+        }
+    }
 
     create() {
         this.indices = new Uint32Array(this.stagedIndices);
