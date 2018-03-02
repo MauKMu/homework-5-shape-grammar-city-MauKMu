@@ -818,7 +818,7 @@ function main() {
     // load textures
     //let pearTex = loadTexture(gl, "textures/banana.png");
 
-    const camera = new Camera(vec3.fromValues(0, 10, 50), vec3.fromValues(0, 8, 0));
+    const camera = new Camera(vec3.fromValues(0, 5, 10), vec3.fromValues(0, 4, 0));
 
     renderer = new OpenGLRenderer(canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
