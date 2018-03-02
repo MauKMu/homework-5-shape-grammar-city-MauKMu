@@ -7,11 +7,24 @@ import {GSymbol, GShape} from './GSymbol';
 
 const INV_SQRT_TWO = 0.70710678118;
 
+export const EDGE_LEFT = 0;
+export const EDGE_RIGHT = 1;
+export const EDGE_BOT = 2;
+export const EDGE_TOP = 3;
+export const EDGE_BACK = 4;
+export const EDGE_FRONT = 5;
+
+
 export class GCube extends GSymbol {
     toUnitCube: mat4;
+    // indexed like: [-x, +x, -y, +y, -z, +z]
+    // index is (2 * axis) + (min ? 0 : 1)
+    isEdge: Array<boolean>;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
+
+        this.isEdge = [true, true, true, true, true, true];
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -41,6 +54,68 @@ export class GCube extends GSymbol {
     expand(p: number): Array<LSymbol> {
         vec3.set(this.scale, this.scale[0], this.scale[1] * 0.5, this.scale[2]);
         return [this, new GCube("blah", vec3.fromValues(this.position[0], this.position[1] + this.scale[1], this.position[2]), this.rotation, vec3.fromValues(this.scale[0] * 0.5, this.scale[1], this.scale[2]))];
+    }
+
+
+    subdivide(axis: number): Array<LSymbol> {
+        let p = lRandom.getNext();
+        let subdivs = Math.floor(2 + p * 2);
+        if (axis == 1) {
+            subdivs += 1;
+        }
+        let arr = new Array<LSymbol>();
+
+        let invSubdivs = 1 / subdivs;
+        // adjust current symbol
+        let len = this.scale[axis];
+        // scale
+        this.scale[axis] *= invSubdivs;
+        // translate
+        let origin = len * 0.5;
+        let newOrigin = origin * invSubdivs;
+        let increment = len * invSubdivs;
+        this.position[axis] += newOrigin - origin;
+        // increment depth
+        this.depth += 1;
+
+        // update isEdge -- store old values
+        let wasMin = this.isEdge[2 * axis];
+        let wasMax = this.isEdge[2 * axis + 1];
+        // update isEdge -- set all on axis to false
+        this.isEdge[2 * axis] = false;
+        this.isEdge[2 * axis + 1] = false;
+    
+        arr.push(this);
+
+        for (let i = 1; i < subdivs; i++) {
+            //let pos = vec3.clone(this.position);
+            //pos[axis] += i * increment;
+            let c = this.spawnCopy();
+            c.position[axis] += i * increment;
+            //let c = new MDCube("A", pos, vec3.clone(this.rotation), vec3.clone(this.scale));
+            //c.depth = this.depth;
+            arr.push(c);
+        }
+
+        // update edge -- restore min/max edges
+        // "this" is min
+        this.isEdge[2 * axis] = wasMin;
+        // last is max
+        (<GCube>arr[subdivs - 1]).isEdge[2 * axis + 1] = wasMax;
+
+        return arr;
+    }
+
+    spawnCopy(): GCube {
+        console.log("GCube clone");
+        let c = new GCube(this.stringRepr + "*", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
+        c.isEdge = this.isEdge.slice();
+        c.depth = this.depth; 
+        return c;
+    }
+
+    isCorner(): boolean {
+        return (this.isEdge[EDGE_LEFT] || this.isEdge[EDGE_RIGHT]) && (this.isEdge[EDGE_BACK] || this.isEdge[EDGE_FRONT]);
     }
 
 };
