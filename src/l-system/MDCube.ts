@@ -1,9 +1,10 @@
-import {vec3, mat3, mat4, quat} from 'gl-matrix';
+import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
 import {LSymbol} from './LSymbol';
 import {GSymbol, GShape} from './GSymbol';
+import {MDCylinder} from './MDCylinder';
 import {GCube, EDGE_BACK, EDGE_BOT, EDGE_FRONT, EDGE_LEFT, EDGE_RIGHT, EDGE_TOP} from './GCube';
 
 // medium density cube
@@ -20,6 +21,7 @@ export class MDCube extends GCube {
         let c = new MDCube(this.stringRepr + "*", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
+        vec4.copy(c.color, this.color);
         return c;
     }
 
@@ -36,15 +38,18 @@ export class MDCube extends GCube {
             // force some subdivs before disappearing
             if (this.depth > 1) {
                 if (this.isEdge[EDGE_BOT] && !this.isEdge[EDGE_TOP]) {
-                    // convert to columns
-                    this.scale[0] *= 0.3;
-                    this.scale[2] *= 0.2;
+                    // "delete" self
+                    this.stringRepr = "0";
                     this.isTerminal = true;
-                    return [this];
+                    this.action = function (lsys: LSystem) { };
+                    // convert to columns
+                    let cyl = new MDCylinder("cyl", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
+                    vec4.copy(cyl.color, this.color);
+                    cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
+                    cyl.scale[2] = cyl.scale[0];
+                    return [cyl];
                 }
                 else if (this.isCorner()){// && this.isEdge[EDGE_TOP]) { 
-                //else if (this.isEdge[EDGE_LEFT] || this.isEdge[EDGE_RIGHT] || this.isEdge[EDGE_BACK] || this.isEdge[EDGE_FRONT] || this.isEdge[EDGE_TOP]) { 
-                //else if (this.isTop) {
                     // delete self
                     this.stringRepr = "0";
                     this.isTerminal = true;
@@ -75,8 +80,6 @@ export class MDCube extends GCube {
             arr = this.subdivide(2);
         }
         return arr;
-        //vec3.set(this.scale, this.scale[0], this.scale[1] * 0.5, this.scale[2]);
-        //return [this, new GCube("blah", vec3.fromValues(this.position[0], this.position[1] + this.scale[1], this.position[2]), this.rotation, vec3.fromValues(this.scale[0] * 0.5, this.scale[1], this.scale[2]))];
     }
 
 };

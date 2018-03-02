@@ -1,4 +1,4 @@
-import {vec3, mat3, mat4, quat} from 'gl-matrix';
+import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
@@ -20,11 +20,15 @@ export class GCube extends GSymbol {
     // indexed like: [-x, +x, -y, +y, -z, +z]
     // index is (2 * axis) + (min ? 0 : 1)
     isEdge: Array<boolean>;
+    color: vec4;
+    sides: number;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
 
         this.isEdge = [true, true, true, true, true, true];
+        this.color = vec4.fromValues(1, 0.5, 0.5, 1);
+        this.sides = 4;
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -39,10 +43,11 @@ export class GCube extends GSymbol {
             mat4.fromRotationTranslationScale(m, q, this.position, this.scale); 
 
             mat4.multiply(m, m, this.toUnitCube);
+            lsys.plant.useColor(this.color);
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);
-            lsys.plant.addNormalCorrectPrism(m, 4, 1, 1, 1);
+            lsys.plant.addNormalCorrectPrism(m, this.sides, 1, 1, 1);
         };
     }
 
@@ -87,11 +92,16 @@ export class GCube extends GSymbol {
     
         arr.push(this);
 
+        let factor = 0.85;
+
         for (let i = 1; i < subdivs; i++) {
             //let pos = vec3.clone(this.position);
             //pos[axis] += i * increment;
             let c = this.spawnCopy();
             c.position[axis] += i * increment;
+            c.color[1] *= factor;
+            c.color[2] *= factor;
+            factor *= 0.85;
             //let c = new MDCube("A", pos, vec3.clone(this.rotation), vec3.clone(this.scale));
             //c.depth = this.depth;
             arr.push(c);
@@ -111,6 +121,7 @@ export class GCube extends GSymbol {
         let c = new GCube(this.stringRepr + "*", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
+        vec4.copy(c.color, this.color);
         return c;
     }
 
