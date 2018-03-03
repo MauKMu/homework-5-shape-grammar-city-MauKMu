@@ -30,6 +30,7 @@ export class GCube extends GSymbol {
     subdivRange: number;
     scaleTop: number;
     subdivMustBeOdd: boolean;
+    subdivMustBeEven: boolean;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
@@ -42,6 +43,7 @@ export class GCube extends GSymbol {
         this.subdivRange = 2;
         this.scaleTop = 1;
         this.subdivMustBeOdd = false;
+        this.subdivMustBeEven = false;
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -82,7 +84,8 @@ export class GCube extends GSymbol {
         if (axis == 1) {
             subdivs += 1;
         }
-        if (this.subdivMustBeOdd && (subdivs % 2 == 0)) {
+        let isEven = (subdivs % 2) == 0;
+        if ((this.subdivMustBeEven && !isEven) || (this.subdivMustBeOdd && isEven)) {
             subdivs += 1;
         }
 

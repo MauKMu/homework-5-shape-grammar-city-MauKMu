@@ -240,8 +240,8 @@ function updateFruit(fruit: FruitEnum) {
 
 function bleh() {
     let gc1 = new HDCube("cube1", vec3.fromValues(0, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
-    let gc2 = new HDCube("cube2", vec3.fromValues(1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
-    let gc3 = new HDCube("cube3", vec3.fromValues(1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 2));
+    let gc2 = new HDCube("cube2", vec3.fromValues(1, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
+    let gc3 = new HDCube("cube3", vec3.fromValues(2, 5, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
     let gc4 = new HDCube("cube2", vec3.fromValues(-1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
     //let rf = new LDRoof("roof", vec3.fromValues(-1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
 

@@ -10,10 +10,16 @@ import {GCube, EDGE_BACK, EDGE_BOT, EDGE_FRONT, EDGE_LEFT, EDGE_RIGHT, EDGE_TOP}
 
 const MAX_DEPTH = 3;
 
+// use as bitfield
+const HD_BLDG_ROUND = 1;
+const HD_BLDG_ALTERNATING = 2;
+
 export class HDCube extends GCube {
+    flags: number;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
+        this.flags = 0;
     }
 
     spawnCopy(): HDCube {
@@ -22,6 +28,8 @@ export class HDCube extends GCube {
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
         c.subdivCount = this.subdivCount.slice();
+        c.flags = this.flags;
+        c.sides = this.sides;
         return c;
     }
 
@@ -34,14 +42,26 @@ export class HDCube extends GCube {
     // p should be in [0, 1]
     expand(p: number): Array<LSymbol> {
         if (this.depth == 0) {
+            // pick whether we want to be an "alt shape" building
+            // will propagate to all children
+            this.flags = 0;
+            if (p < 0.5) {
+                this.flags |= HD_BLDG_ROUND;
+            }
+            if (lRandom.getNext() < 0.7) {
+                this.flags |= HD_BLDG_ALTERNATING;
+            }
             // do "lots" of subdivisions along Y
             this.subdivMin = 6;
             this.subdivRange = 4;
             let arr = this.subdivide(1);
-            let scale = 0.9;
-            for (let i = 1; i < arr.length; i++) {
+            // if round, scale down to account for rounder prisms being bigger
+            let scale = ((this.flags & HD_BLDG_ROUND) ? 0.71 : 1.0);
+            let sides = (this.flags & HD_BLDG_ROUND) ? 8 : 4;
+            for (let i = 0; i < arr.length; i++) {
                 (<GCube>arr[i]).scale[0] *= scale;
                 (<GCube>arr[i]).scale[2] *= scale;
+                (<GCube>arr[i]).sides = sides;
                 scale *= 0.9;
             }
             return arr;
@@ -55,7 +75,9 @@ export class HDCube extends GCube {
                     spike.isTerminal = true;
                     spike.scaleTop = 0.1;
                     spike.scale[0] *= 0.2;
+                    spike.scale[1] *= 2;
                     spike.scale[2] *= 0.2;
+                    spike.sides = 12;
                     // delete self (not necessary if returning just spike?)
                     this.stringRepr = "0";
                     this.isTerminal = true;
@@ -67,19 +89,44 @@ export class HDCube extends GCube {
                     p = lRandom.getNext();
                 }
             }
+            if (!(this.flags & HD_BLDG_ALTERNATING)) {
+                this.depth += 1;
+                return [this];
+            }
             // add "in and out" effect
             this.subdivMin = 3;
             this.subdivRange = 7;
-            
-            this.subdivMustBeOdd = true;
 
+            //let arr: Array<LSymbol>;
+            // shrink inner layers
+            this.subdivMustBeOdd = true;
+            this.color = vec4.fromValues(0.4, 0.4, 1, 1);
             let arr = this.subdivide(1);
-            let scale = 1.2;
+            let scale = 0.93;
             for (let i = 1; i < arr.length; i += 2) {
                 (<GCube>arr[i]).scale[0] *= scale;
                 (<GCube>arr[i]).scale[2] *= scale;
-                (<GCube>arr[i]).sides = 8;
             }
+            /*
+            else {
+                // make some layers "round"
+                this.subdivMustBeOdd = true;
+                arr = this.subdivide(1);
+                let scale = 0.86;
+                for (let i = 0; i < arr.length; i += 2) {
+                    (<GCube>arr[i]).scale[0] *= scale;
+                    (<GCube>arr[i]).scale[2] *= scale;
+                    (<GCube>arr[i]).sides = 8;
+                }
+
+                scale *= 0.93;
+                for (let i = 1; i < arr.length; i += 2) {
+                    (<GCube>arr[i]).scale[0] *= scale;
+                    (<GCube>arr[i]).scale[2] *= scale;
+                    (<GCube>arr[i]).sides = 8;
+                }
+            }
+            */
             return arr;
         }
         /*
