@@ -28,6 +28,8 @@ export class GCube extends GSymbol {
     // used in subdivision
     subdivMin: number;
     subdivRange: number;
+    scaleTop: number;
+    subdivMustBeOdd: boolean;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
@@ -38,6 +40,8 @@ export class GCube extends GSymbol {
         this.subdivCount = [0, 0, 0];
         this.subdivMin = 2;
         this.subdivRange = 2;
+        this.scaleTop = 1;
+        this.subdivMustBeOdd = false;
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -57,7 +61,7 @@ export class GCube extends GSymbol {
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);
-            lsys.plant.addNormalCorrectPrism(m, this.sides, 1, 1, 1);
+            lsys.plant.addNormalCorrectPrism(m, this.sides, 1, this.scaleTop, 1);
         };
     }
 
@@ -76,6 +80,9 @@ export class GCube extends GSymbol {
         let p = lRandom.getNext();
         let subdivs = Math.floor(this.subdivMin + p * this.subdivRange);
         if (axis == 1) {
+            subdivs += 1;
+        }
+        if (this.subdivMustBeOdd && (subdivs % 2 == 0)) {
             subdivs += 1;
         }
 
