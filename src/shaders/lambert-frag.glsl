@@ -13,7 +13,7 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
-uniform sampler2D u_Sampler0;
+//uniform sampler2D u_Sampler0;
 
 uniform vec3 u_LightPos;
 
@@ -90,7 +90,7 @@ float getFBM(vec2 pt, float startFreq) {
 
 // "normalizes" coordinate before calling FBM
 float getFBMFromRawPosition(vec2 pos, float startFreq) {
-    vec2 coord = pos / 100.0;
+    vec2 coord = pos / 150.0;
     coord += vec2(3.14, 5.01);
     //return pow(sin(coord.x + coord.y), 2.0);
     return getFBM(coord, startFreq);
@@ -102,8 +102,8 @@ void main()
         vec4 diffuseColor = fs_Col;
         // read texture
         if (fs_UV.x >= 0.0) {
-            diffuseColor = texture(u_Sampler0, fs_UV);
-            //diffuseColor = vec4(fs_UV, 0.0, 1.0);
+            //diffuseColor = texture(u_Sampler0, fs_UV);
+            diffuseColor = vec4(fs_UV, 0.0, 1.0);
         }
 
         // Calculate the diffuse term for Lambert shading
@@ -121,7 +121,7 @@ void main()
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
         // handle ground plane
         if (fs_UV.x > 99.99) {
-            float fbm = getFBMFromRawPosition(fs_Pos.xz, 1.0);
+            float fbm = getFBMFromRawPosition(fs_Pos.xz, 0.5);
             //fbm = pow(fbm, 2.0);
             out_Col = vec4(vec3(fbm), 1);
             //out_Col = vec4((fs_Pos.xz / 50.0) * 0.5 + vec2(0.5), 0.0, 1.0);

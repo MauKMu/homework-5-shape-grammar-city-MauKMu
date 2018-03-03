@@ -241,7 +241,7 @@ function updateFruit(fruit: FruitEnum) {
 function bleh() {
     let axiom = new Array<LSymbol>();
 
-    const planeDims = vec2.fromValues(100, 100);
+    const planeDims = vec2.fromValues(150, 150);
     const planeDimsDouble = vec2.fromValues(planeDims[0] * 2.0, planeDims[1] * 2.0);
     const planeMin = vec2.fromValues(-planeDims[0], -planeDims[1]);
 
@@ -250,7 +250,7 @@ function bleh() {
     });
     axiom.push(ground);
 
-    const gridDims = vec2.fromValues(30, 30);
+    const gridDims = vec2.fromValues(45, 45);
     let pos = vec2.create();
     let offset = vec2.create();
 
@@ -262,31 +262,75 @@ function bleh() {
             // pos = planeMin + planeDimsDouble * offset
             vec2.multiply(pos, planeDimsDouble, offset);
             vec2.add(pos, pos, planeMin);
-            let fbm = getFBMFromRawPosition(pos, 1.0);
+            let fbm = getFBMFromRawPosition(pos, 0.5);
+            // remap FBM because it's apparently in [0.25, 0.65]
+            fbm = (fbm - 0.25) / 0.4;
             //fbm = Math.pow(fbm, 2.0);
-            //console.log(pos);
-            //console.log("fbm:");
-            //console.log(fbm);
-            //console.log("fbm POW ===============:");
-            //console.log(Math.pow(fbm, 2.0));
             // place bldg =====================================================
+            const LD_THRESHOLD = 0.333;
+            const MD_THRESHOLD = 0.633;
+
             let bldg: GCube;
-            if (fbm < 0.333) {
-                //bldg = new LDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
-                bldg = new LDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
-                bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
-                bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 90 - 45, 0);
+            if (fbm < LD_THRESHOLD) {
+                // low-density area ===========================================
+                // mostly LD, some MD, some NONE
+                let p = lRandom.getNext() * (fbm / LD_THRESHOLD);
+                if (p < 0.1) {
+                    // no bldg
+                }
+                else if (p < 0.8) {
+                    bldg = new LDCube("LD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
+                    bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
+                    bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 90 - 45, 0);
+                }
+                else {
+                    bldg = new MDCube("MD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 20, 4));
+                    bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                    bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
+                    bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 20 - 10, 0);
+                }
             }
-            else if (fbm < 0.667) {
-                //bldg = new MDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 20, 4));
-                bldg = new MDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 20, 4));
-                bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
-                bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 20 - 10, 0);
+            else if (fbm < MD_THRESHOLD) {
+                // mid-density area ===========================================
+                // moslty MD, some LD, some HD
+                let p = lRandom.getNext() * (fbm - LD_THRESHOLD) / (MD_THRESHOLD - LD_THRESHOLD);
+                if (p < 0.15) {
+                    bldg = new LDCube("LD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
+                    bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
+                    bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                    bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 90 - 45, 0);
+                }
+                else if (p < 0.9) {
+                    bldg = new MDCube("MD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 25, 4));
+                    bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                    bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 20 - 10, 0);
+                }
+                else {
+                    bldg = new HDCube("HD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 60, 4));
+                    bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
+                    bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                }
             }
             else {
-                //bldg = new HDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 100, 4));
-                bldg = new HDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 70, 4));
-                bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
+                // high-density area ==========================================
+                // mostly HD, some MD
+                let p = lRandom.getNext() * (fbm - MD_THRESHOLD) / (1.0 - MD_THRESHOLD);
+                //console.log(["p: ", p]);
+                console.log(["fbm: ", fbm]);
+                //console.log(["scale: ", (fbm - MD_THRESHOLD) / (1.0 - MD_THRESHOLD)]);
+                if (p < 0.1) {
+                    bldg = new MDCube("MD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 40, 4));
+                    bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                    bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
+                    bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 20 - 10, 0);
+                }
+                else {
+                    bldg = new HDCube("HD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 70, 4));
+                    bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
+                }
+            }
+            if (bldg == undefined) {
+                continue;
             }
             bldg.globalTranslation = vec3.fromValues(pos[0], 0, pos[1]);
             bldg.globalTranslation[1] += bldg.scale[1] * 0.5;
@@ -881,7 +925,7 @@ function main() {
     // load textures
     //let pearTex = loadTexture(gl, "textures/banana.png");
 
-    const camera = new Camera(vec3.fromValues(0, 5, 10), vec3.fromValues(0, 4, 0));
+    const camera = new Camera(vec3.fromValues(0, 15, 100), vec3.fromValues(0, 13, 0));
 
     renderer = new OpenGLRenderer(canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
@@ -943,7 +987,7 @@ function main() {
     shaders[ShaderEnum.BLDGS] = bldgs;
 
     // set shader to use texture
-    lambert.setSampler0(texture);
+    //lambert.setSampler0(texture);
 
     // This function will be called every frame
     function tick() {
