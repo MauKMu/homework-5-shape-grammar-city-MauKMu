@@ -32,8 +32,13 @@ export class GCube extends GSymbol {
     subdivMustBeOdd: boolean;
     subdivMustBeEven: boolean;
 
+    globalRotation: vec3;
+    globalTranslation: vec3;
+
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
+        this.globalRotation = vec3.create();
+        this.globalTranslation = vec3.create();
 
         this.isEdge = [true, true, true, true, true, true];
         this.color = vec4.fromValues(1, 0.5, 0.5, 1);
@@ -63,6 +68,13 @@ export class GCube extends GSymbol {
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);
+            // apply global rotation after local transforms
+            let globalQ = quat.create();
+            quat.fromEuler(globalQ, this.globalRotation[0], this.globalRotation[1], this.globalRotation[2]);
+            let globalM = mat4.create();
+            mat4.fromRotationTranslation(globalM, globalQ, this.globalTranslation);
+
+            mat4.multiply(m, globalM, m);
             lsys.plant.addNormalCorrectPrism(m, this.sides, 1, this.scaleTop, 1);
         };
     }

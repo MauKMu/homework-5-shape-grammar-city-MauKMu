@@ -20,6 +20,7 @@ export class MDCylinder extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        c.globalRotation = vec3.clone(this.globalRotation);
         return c;
     }
 

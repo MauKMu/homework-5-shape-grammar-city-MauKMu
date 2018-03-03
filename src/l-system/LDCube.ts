@@ -23,6 +23,9 @@ export class LDCube extends GCube {
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
         c.subdivCount = this.subdivCount.slice();
+        c.globalRotation = vec3.clone(this.globalRotation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
     }
 
@@ -83,6 +86,8 @@ export class LDCube extends GCube {
             roof.isEdge[EDGE_TOP] = true;
             roof.isTerminal = false;
             roof.depth = 4;
+            roof.globalRotation = vec3.clone(this.globalRotation);
+            roof.globalTranslation = vec3.clone(this.globalTranslation);
             arr[arr.length - 1] = roof;
             return arr;
         }

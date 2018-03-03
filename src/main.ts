@@ -19,10 +19,10 @@ var OBJ = require('webgl-obj-loader');
 import Turtle from './l-system/Turtle';
 import {LSymbol, ExpansionRule} from './l-system/LSymbol';
 import LSystem from './l-system/LSystem';
-import {lRandom, LRANDOM_MATH_RANDOM, LRANDOM_DETERMINISTIC} from './l-system/LRandom';
+import {lRandom, LRANDOM_MATH_RANDOM, LRANDOM_DETERMINISTIC, getFBMFromRawPosition} from './l-system/LRandom';
 
 import {GSymbol} from './l-system/GSymbol';
-//import {GCube} from './l-system/GCube';
+import {GCube} from './l-system/GCube';
 import {HDCube} from './l-system/HDCube';
 import {MDCube} from './l-system/MDCube';
 import {LDCube} from './l-system/LDCube';
@@ -239,9 +239,63 @@ function updateFruit(fruit: FruitEnum) {
 }
 
 function bleh() {
+    let axiom = new Array<LSymbol>();
+
+    const planeDims = vec2.fromValues(50, 50);
+    const planeDimsDouble = vec2.fromValues(planeDims[0] * 2.0, planeDims[1] * 2.0);
+    const planeMin = vec2.fromValues(-planeDims[0], -planeDims[1]);
+
     let ground = new LSymbol("GND", function (lsys: LSystem) {
-        lsys.plant.addPlane(vec2.fromValues(100, 100));
+        lsys.plant.addPlane(planeDims);
     });
+    axiom.push(ground);
+
+    const gridDims = vec2.fromValues(15, 15);
+    let pos = vec2.create();
+    let offset = vec2.create();
+
+    for (let i = 0; i < gridDims[0]; i++) {
+        offset[0] = (i + 0.5) / gridDims[0];
+        for (let j = 0; j < gridDims[1]; j++) {
+            // get FBM ========================================================
+            offset[1] = (j + 0.5) / gridDims[1];
+            // pos = planeMin + planeDimsDouble * offset
+            vec2.multiply(pos, planeDimsDouble, offset);
+            vec2.add(pos, pos, planeMin);
+            let fbm = getFBMFromRawPosition(pos, 1.0);
+            //fbm = Math.pow(fbm, 2.0);
+            //console.log(pos);
+            //console.log("fbm:");
+            //console.log(fbm);
+            //console.log("fbm POW ===============:");
+            //console.log(Math.pow(fbm, 2.0));
+            // place bldg =====================================================
+            let bldg: GCube;
+            if (fbm < 0.333) {
+                //bldg = new LDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
+                bldg = new LDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
+                bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
+                bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 90 - 45, 0);
+            }
+            else if (fbm < 0.667) {
+                //bldg = new MDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 20, 4));
+                bldg = new MDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 20, 4));
+                bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
+                bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 20 - 10, 0);
+            }
+            else {
+                //bldg = new HDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 100, 4));
+                bldg = new HDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 100, 4));
+                bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
+            }
+            bldg.globalTranslation = vec3.fromValues(pos[0], 0, pos[1]);
+            bldg.globalTranslation[1] += bldg.scale[1] * 0.5;
+            //bldg.position[1] += bldg.scale[1] * 0.5;
+            //bldg.color = vec4.fromValues((i + 0.5) / gridDims[0], (j + 0.5) / gridDims[1], 0, 1);
+            axiom.push(bldg);
+        }
+    }
+
     let gc1 = new HDCube("cube1", vec3.fromValues(0, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
     let gc2 = new HDCube("cube2", vec3.fromValues(1, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
     let gc3 = new HDCube("cube3", vec3.fromValues(2, 5, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
@@ -249,7 +303,8 @@ function bleh() {
     //let rf = new LDRoof("roof", vec3.fromValues(-1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
 
     lsys = new LSystem();
-    lsys.setAxiom([ground, gc1, gc2, gc3, gc4]);
+    //lsys.setAxiom([ground, gc1, gc2, gc3, gc4]);
+    lsys.setAxiom(axiom);
 
     //lsys.expandString();
 

@@ -23,6 +23,8 @@ export class MDCube extends GCube {
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
         c.subdivCount = this.subdivCount.slice();
+        c.globalRotation = vec3.clone(this.globalRotation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
     }
 
@@ -48,6 +50,8 @@ export class MDCube extends GCube {
                     vec4.copy(cyl.color, this.color);
                     cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
                     cyl.scale[2] = cyl.scale[0];
+                    cyl.globalRotation = vec3.clone(this.globalRotation);
+                    cyl.globalTranslation = vec3.clone(this.globalTranslation);
                     return [cyl];
                 }
                 else if (this.isCorner()){// && this.isEdge[EDGE_TOP]) { 

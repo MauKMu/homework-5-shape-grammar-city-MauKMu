@@ -30,6 +30,8 @@ export class HDCube extends GCube {
         c.subdivCount = this.subdivCount.slice();
         c.flags = this.flags;
         c.sides = this.sides;
+        c.globalRotation = vec3.clone(this.globalRotation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
     }
 
@@ -78,6 +80,8 @@ export class HDCube extends GCube {
                     spike.scale[1] *= 2;
                     spike.scale[2] *= 0.2;
                     spike.sides = 12;
+                    spike.globalTranslation = vec3.clone(this.globalTranslation);
+                    spike.globalRotation = vec3.clone(this.globalRotation);
                     // delete self (not necessary if returning just spike?)
                     this.stringRepr = "0";
                     this.isTerminal = true;

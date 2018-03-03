@@ -35,6 +35,8 @@ export class LDRoof extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        c.globalRotation = vec3.clone(this.globalRotation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
     }
 
@@ -59,6 +61,8 @@ export class LDRoof extends GCube {
             chimney.position[2] += chimney.scale[0] * (0.75 + 0.75 * lRandom.getNext()) * (lRandom.getNext() > 0.5 ? 1.0 : - 1.0);
             chimney.isTerminal = true;
             chimney.depth = 5;
+            chimney.globalTranslation = vec3.clone(this.globalTranslation);
+            chimney.globalRotation = vec3.clone(this.globalRotation);
             return [this, chimney];
         }
         return [this];
