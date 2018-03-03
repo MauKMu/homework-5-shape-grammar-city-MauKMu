@@ -19,6 +19,7 @@ uniform vec3 u_LightPos;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
+in vec4 fs_Pos;
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
@@ -50,5 +51,11 @@ void main()
 
         // Compute final shaded color
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        // handle ground plane
+        if (fs_UV.x > 99.99) {
+            vec2 coord = fs_Pos.xz / 100.0;
+            coord = coord * 0.5 + vec2(0.5);
+            out_Col = vec4(coord, 0, 1);
+        }
         //out_Col = vec4(fs_Nor.xyz * 0.5 + vec3(0.5), 1.0);
 }

@@ -104,6 +104,27 @@ class Plant extends Drawable {
         vec4.copy(this.currColor, color);
     }
 
+    // hardcoded XZ plane
+    addPlane(dims: vec2) {
+        let idxStart = this.stagedPositions.length / 4;
+        const xFactor = [-1, 1, -1, 1];
+        const zFactor = [-1, -1, 1, 1];
+
+        const nor = vec3.fromValues(0, 1, 0);
+        const uv = vec2.fromValues(100, 100); // use this in shader to know vertex is from plane...
+
+        for (let i = 0; i < 4; i++) {
+            let pos = vec4.fromValues(dims[0] * xFactor[i], 0, dims[1] * zFactor[i], 1);
+            appendVec4ToArray(this.stagedPositions, pos);
+            appendVec4ToArray(this.stagedColors, this.currColor);
+            appendVec2ToArray(this.stagedUVs, uv);
+            appendNormalToArray(this.stagedNormals, nor);
+        }
+
+        appendTri(this.stagedIndices, idxStart + 1, idxStart + 0, idxStart + 2); 
+        appendTri(this.stagedIndices, idxStart + 1, idxStart + 2, idxStart + 3); 
+    }
+
     // add mesh loaded by OBJ loader
     addDecoration(mesh: any, transform: mat4) {
         // set up =============================================

@@ -1,5 +1,5 @@
 // models from https://www.models-resource.com/wii/kirbysreturntodreamland/model/4572/
-import {vec3, vec4, mat3, mat4} from 'gl-matrix';
+import {vec2, vec3, vec4, mat3, mat4} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Icosphere from './geometry/Icosphere';
@@ -239,6 +239,9 @@ function updateFruit(fruit: FruitEnum) {
 }
 
 function bleh() {
+    let ground = new LSymbol("GND", function (lsys: LSystem) {
+        lsys.plant.addPlane(vec2.fromValues(100, 100));
+    });
     let gc1 = new HDCube("cube1", vec3.fromValues(0, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
     let gc2 = new HDCube("cube2", vec3.fromValues(1, 5, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
     let gc3 = new HDCube("cube3", vec3.fromValues(2, 5, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 10, 1));
@@ -246,7 +249,7 @@ function bleh() {
     //let rf = new LDRoof("roof", vec3.fromValues(-1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
 
     lsys = new LSystem();
-    lsys.setAxiom([gc1, gc2, gc3, gc4]);
+    lsys.setAxiom([ground, gc1, gc2, gc3, gc4]);
 
     //lsys.expandString();
 
