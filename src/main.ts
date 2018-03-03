@@ -24,6 +24,8 @@ import {lRandom, LRANDOM_MATH_RANDOM, LRANDOM_DETERMINISTIC} from './l-system/LR
 import {GSymbol} from './l-system/GSymbol';
 //import {GCube} from './l-system/GCube';
 import {MDCube} from './l-system/MDCube';
+import {LDCube} from './l-system/LDCube';
+import {LDRoof} from './l-system/LDRoof';
 
 enum ShaderEnum {
     LAMBERT = 1,
@@ -236,12 +238,14 @@ function updateFruit(fruit: FruitEnum) {
 }
 
 function bleh() {
-    let gc1 = new MDCube("cube1", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
-    let gc2 = new MDCube("cube2", vec3.fromValues(1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
-    let gc3 = new MDCube("cube3", vec3.fromValues(1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 2));
+    let gc1 = new LDCube("cube1", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
+    let gc2 = new LDCube("cube2", vec3.fromValues(1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
+    let gc3 = new LDCube("cube3", vec3.fromValues(1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 2));
+    let gc4 = new LDCube("cube2", vec3.fromValues(-1, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
+    let rf = new LDRoof("roof", vec3.fromValues(-1, 1, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(1, 1, 1));
 
     lsys = new LSystem();
-    lsys.setAxiom([gc1, gc2, gc3]);
+    lsys.setAxiom([gc1, gc2, gc3, gc4, rf]);
 
     //lsys.expandString();
 

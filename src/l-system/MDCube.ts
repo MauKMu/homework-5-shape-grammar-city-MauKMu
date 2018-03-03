@@ -22,6 +22,7 @@ export class MDCube extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        c.subdivCount = this.subdivCount.slice();
         return c;
     }
 

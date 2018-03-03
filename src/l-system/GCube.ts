@@ -22,6 +22,12 @@ export class GCube extends GSymbol {
     isEdge: Array<boolean>;
     color: vec4;
     sides: number;
+    // indexed like: [x, y, z]
+    // how many times this has subdivided on this axis
+    subdivCount: Array<number>;
+    // used in subdivision
+    subdivMin: number;
+    subdivRange: number;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
@@ -29,6 +35,9 @@ export class GCube extends GSymbol {
         this.isEdge = [true, true, true, true, true, true];
         this.color = vec4.fromValues(1, 0.5, 0.5, 1);
         this.sides = 4;
+        this.subdivCount = [0, 0, 0];
+        this.subdivMin = 2;
+        this.subdivRange = 2;
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -40,6 +49,7 @@ export class GCube extends GSymbol {
             let q = quat.create();
             quat.fromEuler(q, this.rotation[0], this.rotation[1], this.rotation[2]);
             let m = mat4.create();
+            //mat4.fromRotationTranslation(m, q, vec3.fromValues(0, 0, 0));
             mat4.fromRotationTranslationScale(m, q, this.position, this.scale); 
 
             mat4.multiply(m, m, this.toUnitCube);
@@ -64,10 +74,13 @@ export class GCube extends GSymbol {
 
     subdivide(axis: number): Array<LSymbol> {
         let p = lRandom.getNext();
-        let subdivs = Math.floor(2 + p * 2);
+        let subdivs = Math.floor(this.subdivMin + p * this.subdivRange);
         if (axis == 1) {
             subdivs += 1;
         }
+
+        this.subdivCount[axis] += 1;
+
         let arr = new Array<LSymbol>();
 
         let invSubdivs = 1 / subdivs;
@@ -122,6 +135,7 @@ export class GCube extends GSymbol {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        c.subdivCount = this.subdivCount.slice();
         return c;
     }
 
