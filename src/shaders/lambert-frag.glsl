@@ -90,7 +90,7 @@ float getFBM(vec2 pt, float startFreq) {
 
 // "normalizes" coordinate before calling FBM
 float getFBMFromRawPosition(vec2 pos, float startFreq) {
-    vec2 coord = pos / 50.0;
+    vec2 coord = pos / 100.0;
     coord += vec2(3.14, 5.01);
     //return pow(sin(coord.x + coord.y), 2.0);
     return getFBM(coord, startFreq);

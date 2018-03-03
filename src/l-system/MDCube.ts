@@ -33,13 +33,53 @@ export class MDCube extends GCube {
         //return (!this.isTerminal) && (this.isBot || this.isTop);
     }
 
+    isOuterXZ(): boolean {
+        return this.isEdge[EDGE_LEFT] || this.isEdge[EDGE_RIGHT] || this.isEdge[EDGE_BACK] || this.isEdge[EDGE_FRONT];
+    }
+
     // p should be in [0, 1]
     expand(p: number): Array<LSymbol> {
-        const DEL_THRESHOLD = 0.8;
-
-        if (p > DEL_THRESHOLD) {
-            // force some subdivs before disappearing
-            if (this.depth > 1) {
+        if (this.depth == 0) {
+            // subdivide along X, Z only
+            this.subdivMin = 4;
+            this.subdivRange = 3;
+            if (p < 0.5) {
+                return this.subdivide(0);
+            }
+            else {
+                return this.subdivide(2);
+            }
+        }
+        else if (this.depth == 1) {
+            // subdivide along other axis
+            if (this.subdivCount[0] > 0) {
+                return this.subdivide(2);
+            }
+            else {
+                return this.subdivide(0);
+            }
+        }
+        else if (this.depth == 2) {
+            // delete with moderate chance
+            if (p < 0.3 && this.isCorner()) {
+                // "delete" self
+                this.stringRepr = "0";
+                this.isTerminal = true;
+                this.action = function (lsys: LSystem) { };
+                this.depth += 1;
+                return [this];
+            }
+            else {
+                // subdivide by Y once
+                this.subdivMin = 2;
+                this.subdivRange = 6;
+                return this.subdivide(1);
+            }
+        }
+        else if (this.depth < 5) {
+            // try deleting twice based on Y division
+            this.depth += 1;
+            if (p < 0.3) {
                 if (this.isEdge[EDGE_BOT] && !this.isEdge[EDGE_TOP]) {
                     // "delete" self
                     this.stringRepr = "0";
@@ -54,7 +94,7 @@ export class MDCube extends GCube {
                     cyl.globalTranslation = vec3.clone(this.globalTranslation);
                     return [cyl];
                 }
-                else if (this.isCorner()){// && this.isEdge[EDGE_TOP]) { 
+                else if (this.isCorner() && this.isEdge[EDGE_TOP]) {// && this.isEdge[EDGE_TOP]) {  
                     // delete self
                     this.stringRepr = "0";
                     this.isTerminal = true;
@@ -62,29 +102,10 @@ export class MDCube extends GCube {
                     return [this];
                 }
             }
-        }
-        else {
-            // normalize
-            p /= DEL_THRESHOLD;
-        }
-
-        if (this.depth >= MAX_DEPTH) {
-            // don't subdivide
             return [this];
         }
-        
-        // else, try subdividing
-        let arr: Array<LSymbol>;
-        if (p < 0.333) {
-            arr = this.subdivide(0);
-        }
-        else if (p < 0.466) {
-            arr = this.subdivide(1);
-        }
-        else {
-            arr = this.subdivide(2);
-        }
-        return arr;
+        this.isTerminal = true;
+        return [this];
     }
 
 };

@@ -157,7 +157,7 @@ export function getFBMFromRawPosition(pos: vec2, startFreq: number): number {
     //vec2 coord = pos / 100.0;
     //coord += vec2(3.14, 5.01);
     let coord = vec2.clone(pos);
-    vec2.scaleAndAdd(coord, vec2.fromValues(3.14, 5.01), coord, 1 / 50.0);
+    vec2.scaleAndAdd(coord, vec2.fromValues(3.14, 5.01), coord, 1 / 100.0);
     //return Math.pow(Math.sin(coord[0] + coord[1]), 2.0);
     return getFBM(coord, startFreq);
 }

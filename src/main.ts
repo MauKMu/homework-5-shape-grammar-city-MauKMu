@@ -241,7 +241,7 @@ function updateFruit(fruit: FruitEnum) {
 function bleh() {
     let axiom = new Array<LSymbol>();
 
-    const planeDims = vec2.fromValues(50, 50);
+    const planeDims = vec2.fromValues(100, 100);
     const planeDimsDouble = vec2.fromValues(planeDims[0] * 2.0, planeDims[1] * 2.0);
     const planeMin = vec2.fromValues(-planeDims[0], -planeDims[1]);
 
@@ -250,7 +250,7 @@ function bleh() {
     });
     axiom.push(ground);
 
-    const gridDims = vec2.fromValues(15, 15);
+    const gridDims = vec2.fromValues(30, 30);
     let pos = vec2.create();
     let offset = vec2.create();
 
@@ -285,7 +285,7 @@ function bleh() {
             }
             else {
                 //bldg = new HDCube("cube", vec3.fromValues(pos[0], 0, pos[1]), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 100, 4));
-                bldg = new HDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 100, 4));
+                bldg = new HDCube("cube", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 70, 4));
                 bldg.color = vec4.fromValues(fbm, 0.4, 0.4, 1);
             }
             bldg.globalTranslation = vec3.fromValues(pos[0], 0, pos[1]);
