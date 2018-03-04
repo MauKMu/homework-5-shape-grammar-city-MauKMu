@@ -103,22 +103,14 @@ export class LDCube extends GCube {
             arr[arr.length - 1] = roof;
             return arr;
         }
-        else if (this.depth == 4 && this.isEdge[EDGE_TOP]) {
-            this.depth = 5;
-            /*
-            // add chimney with small probability
-            let chimney = new LDCube("chimney", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
-            // make chimney square (from top)
-            chimney.scale[0] = Math.min(this.scale[0], this.scale[2]) * 0.4;
-            chimney.scale[2] = chimney.scale[0];
-            // move chimney
-            chimney.position[0] += this.scale[0] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.position[2] += this.scale[2] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.isTerminal = true;
-            chimney.depth = 5;
-            return [this, chimney];
-            */
-            return [this];
+        else if (this.depth == 4) {
+            this.depth += 1;
+            if (p < 0.4) {
+                return this.getWindows();
+            }
+            else {
+                return [this];
+            }
         }
         this.isTerminal = true;
         return [this];

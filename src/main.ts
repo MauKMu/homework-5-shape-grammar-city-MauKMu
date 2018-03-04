@@ -77,7 +77,7 @@ const controls = {
     perlinSeed: 0,
 };
 
-let icosphere: Icosphere;
+//let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
 let plant: Plant;
@@ -146,8 +146,8 @@ function redrawPlant() {
 }
 
 function loadScene() {
-    icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
-    icosphere.create();
+    //icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
+    //icosphere.create();
     square = new Square(vec3.fromValues(0, 0, 0));
     square.create();
     cube = new Cube(vec3.fromValues(1.5, 0, 0));
@@ -249,7 +249,7 @@ export {perlinSeed};
 function bleh() {
     let axiom = new Array<LSymbol>();
 
-    const planeDims = vec2.fromValues(150, 150);
+    const planeDims = vec2.fromValues(125, 125);
     const planeDimsDouble = vec2.fromValues(planeDims[0] * 2.0, planeDims[1] * 2.0);
     const planeMin = vec2.fromValues(-planeDims[0], -planeDims[1]);
 
@@ -258,7 +258,7 @@ function bleh() {
     });
     axiom.push(ground);
 
-    const gridDims = vec2.fromValues(45, 45);
+    const gridDims = vec2.fromValues(40, 40);
     let pos = vec2.create();
     let offset = vec2.create();
 

@@ -59,6 +59,10 @@ export class GCube extends GSymbol {
         mat4.fromRotationTranslationScale(this.toUnitCube, toUnitCubeQuat, vec3.fromValues(0, -0.5, 0), vec3.fromValues(INV_SQRT_TWO, INV_PRISM_HEIGHT, INV_SQRT_TWO)); 
 
         this.action = function (lsys: LSystem) {
+            //if (!lsys.plant.isSafeToGrow()) {
+                //console.log("yuge");
+                //return;
+            //}
             // make transformation matrix with all of shape's transformations
             let q = quat.create();
             quat.fromEuler(q, this.rotation[0], this.rotation[1], this.rotation[2]);
@@ -166,7 +170,61 @@ export class GCube extends GSymbol {
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
         c.subdivCount = this.subdivCount.slice();
+        c.globalRotation = vec3.clone(this.globalRotation);
+        c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
+    }
+
+    getWindows(): Array<GCube> {
+        let arr: Array<GCube> = [this];
+        // add windows
+        const windowColor = vec4.fromValues(2, 2, 2, 1);
+        const windowThickness = 0.05;
+        if (this.isEdge[EDGE_LEFT]) {
+            let window = this.spawnCopy();
+            window.isTerminal = true;
+            window.trueColor = vec4.clone(windowColor);
+            window.scale[0] *= windowThickness;
+            window.scale[1] *= 0.4;
+            window.scale[2] *= 0.4;
+            // move into wall
+            window.position[0] -= this.scale[0] * 0.5;
+            arr.push(window);
+        }
+        if (this.isEdge[EDGE_RIGHT]) {
+            let window = this.spawnCopy();
+            window.isTerminal = true;
+            window.trueColor = vec4.clone(windowColor);
+            window.scale[0] *= windowThickness;
+            window.scale[1] *= 0.4;
+            window.scale[2] *= 0.4;
+            // move into wall
+            window.position[0] += this.scale[0] * 0.5;
+            arr.push(window);
+        }
+        if (this.isEdge[EDGE_BACK]) {
+            let window = this.spawnCopy();
+            window.isTerminal = true;
+            window.trueColor = vec4.clone(windowColor);
+            window.scale[0] *= 0.4;
+            window.scale[1] *= 0.4;
+            window.scale[2] *= windowThickness;
+            // move into wall
+            window.position[2] -= this.scale[2] * 0.5;
+            arr.push(window);
+        }
+        if (this.isEdge[EDGE_FRONT]) {
+            let window = this.spawnCopy();
+            window.isTerminal = true;
+            window.trueColor = vec4.clone(windowColor);
+            window.scale[0] *= 0.4;
+            window.scale[1] *= 0.4;
+            window.scale[2] *= windowThickness;
+            // move into wall
+            window.position[2] += this.scale[2] * 0.5;
+            arr.push(window);
+        }
+        return arr;
     }
 
     isCorner(): boolean {

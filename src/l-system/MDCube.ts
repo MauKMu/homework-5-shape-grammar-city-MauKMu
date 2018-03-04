@@ -164,6 +164,10 @@ export class MDCube extends GCube {
             }
             return [this];
         }
+        else if (this.depth == 5) {
+            this.depth += 1;
+            return this.getWindows();
+        }
         this.isTerminal = true;
         return [this];
     }

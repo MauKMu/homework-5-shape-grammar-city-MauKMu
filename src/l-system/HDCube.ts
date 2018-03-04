@@ -131,6 +131,17 @@ export class HDCube extends GCube {
             }
             return arr;
         }
+            /*
+        else if (this.depth == 2) {
+            this.depth += 1;
+            if ((this.flags & HD_BLDG_ALTERNATING) && !(this.flags & HD_BLDG_ROUND)) {
+                return this.getWindows();
+            }
+            else {
+                return [this];
+            }
+        }
+        */
         this.isTerminal = true;
         return [this];
     }
