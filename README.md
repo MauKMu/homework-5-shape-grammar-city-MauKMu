@@ -12,6 +12,14 @@ Click below to go to the demo!
 
 [![](images/example.png)](https://maukmu.github.io/homework-5-shape-grammar-city-MauKMu)
 
+### Quick Start
+
+* Move camera to desired position.
+* Toggle `useDebugColor` if you want a more colorful experience.
+* Click on `Iterate` five times (after the second one, iterations may be a bit slow).
+* Enjoy.
+* You can modify the `perlinSeed`, click on `Regenerate City`, then iterate five times again if you want to see the city built on a different population density distribution.
+
 ## Controls
 
 Below is an explanation of how to use the controls in the demo. A similar explanation of the controls can be accessed by clicking "Show Help" in the demo. Note that, unless otherwise specified, changes will only become visible if you redraw the city using `Regenerate City` or `Redraw City`.
@@ -69,6 +77,24 @@ Note each symbol stores how many times it has been expanded, which is how the sy
       * Else, if this is an "alternating" building:
         * Subdivide itself along Y such that an odd number of sub-blocks is generated, including the original block.
         * Scale every other block in order to create some "texture".
+
+### Building Shape Grammar - Examples
+
+Low-density:
+
+![](images/lo-density.PNG)
+
+Medium-density:
+
+![](images/mid-density.PNG)
+
+High-density (from top):
+
+![](images/hi-density-top.PNG)
+
+High-density (from bottom):
+
+![](images/hi-density-bot.PNG)
 
 ### Building Layout
 
