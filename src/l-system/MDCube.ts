@@ -21,13 +21,25 @@ const myColors = [
     //vec4.fromValues(0.95, 0.75, 0.97, 1.0), // purple
 ];
 
+enum Fate {
+    TERMINAL = 1,
+    COLUMN,
+    DELETED,
+    
+};
+
 export class MDCube extends GCube {
+    fate: Fate;
+    floors: number;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
+        this.fate = Fate.TERMINAL;
         // pick from a few random colors
         let p = lRandom.getNext();
         vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
+        // pick a number of floors
+        this.floors = Math.ceil(lRandom.getNext() * 4) + 8;
     }
 
     spawnCopy(): MDCube {
@@ -39,11 +51,13 @@ export class MDCube extends GCube {
         c.subdivCount = this.subdivCount.slice();
         c.globalRotation = vec3.clone(this.globalRotation);
         c.globalTranslation = vec3.clone(this.globalTranslation);
+        c.floors = this.floors;
+        c.fate = this.fate;
         return c;
     }
 
     canExpand(): boolean {
-        return (!this.isTerminal) && (this.isEdge[EDGE_BOT] || this.isEdge[EDGE_TOP]);
+        return (!this.isTerminal);
         //return (!this.isTerminal) && (this.isBot || this.isTop);
     }
 
@@ -75,7 +89,7 @@ export class MDCube extends GCube {
         }
         else if (this.depth == 2) {
             // delete with moderate chance
-            if ((p < 0.3 && this.isCorner()) || (p < 0.15 && !this.isOuterXZ())) {
+            if ((p < 0.3 && this.isCorner()) || (p < 0.1 && !this.isOuterXZ())) {
                 // "delete" self
                 this.stringRepr = "0";
                 this.isTerminal = true;
@@ -85,37 +99,65 @@ export class MDCube extends GCube {
             }
             else {
                 // subdivide by Y once
-                this.subdivMin = 2;
-                this.subdivRange = 6;
-                return this.subdivide(1);
+                //this.subdivMin = 2;
+                //this.subdivRange = 6;
+                this.subdivMin = this.floors;
+                this.subdivRange = 0;
+                let arr = this.subdivide(1);
+                // try to make columns
+                if (lRandom.getNext() < 0.3) {
+                    let colCount = Math.ceil(lRandom.getNext() * 3);
+                    for (let i = 0; i < colCount; i++) {
+                        (<MDCube>arr[i]).fate = Fate.COLUMN;
+                    }
+                }
+                // try to delete
+                if (this.isCorner() && lRandom.getNext() < 0.3) {
+                    let delCount = Math.ceil(lRandom.getNext() * 3);
+                    for (let i = 0; i < delCount; i++) {
+                        (<MDCube>arr[arr.length - 1 - i]).fate = Fate.DELETED;
+                    }
+                }
+                // scale every other floor
+                const factor = 1.11;
+                for (let i = 1; i < arr.length; i += 2) {
+                    if ((<MDCube>arr[i]).fate != Fate.TERMINAL) {
+                        // skip because this will be deleted anyway
+                        continue;
+                    }
+                    (<MDCube>arr[i]).scale[0] *= factor;
+                    (<MDCube>arr[i]).scale[2] *= factor;
+                }
+                return arr;
             }
         }
-        else if (this.depth < 5) {
-            // try deleting twice based on Y division
+        else if (this.depth == 3) {
             this.depth += 1;
-            if (p < 0.3) {
-                if (!this.isEdge[EDGE_TOP]) {
-                    // "delete" self
-                    this.stringRepr = "0";
-                    this.isTerminal = true;
-                    this.action = function (lsys: LSystem) { };
-                    // convert to columns
-                    let cyl = new MDCylinder("cyl", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
-                    vec4.copy(cyl.color, this.color);
-                    vec4.copy(cyl.trueColor, this.trueColor);
-                    cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
-                    cyl.scale[2] = cyl.scale[0];
-                    cyl.globalRotation = vec3.clone(this.globalRotation);
-                    cyl.globalTranslation = vec3.clone(this.globalTranslation);
-                    return [cyl];
-                }
-                else if (this.isCorner() && !this.isEdge[EDGE_BOT]) {// && this.isEdge[EDGE_TOP]) {  
-                    // delete self
-                    this.stringRepr = "0";
-                    this.isTerminal = true;
-                    this.action = function (lsys: LSystem) { };
-                    return [this];
-                }
+            if (this.fate == Fate.COLUMN) {
+                // "delete" self
+                this.stringRepr = "0";
+                this.isTerminal = true;
+                this.action = function (lsys: LSystem) { };
+                // convert to columns
+                let cyl = new MDCylinder("cyl", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
+                vec4.copy(cyl.color, this.color);
+                vec4.scale(cyl.trueColor, this.trueColor, 0.7);
+                //vec4.copy(cyl.trueColor, this.trueColor);
+                cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
+                cyl.scale[2] = cyl.scale[0];
+                cyl.globalRotation = vec3.clone(this.globalRotation);
+                cyl.globalTranslation = vec3.clone(this.globalTranslation);
+                return [cyl];
+            }
+            return [this];
+        }
+        else if (this.depth == 4) {
+            this.depth += 1;
+            if (this.fate == Fate.DELETED) {
+                // delete self
+                this.stringRepr = "0";
+                this.isTerminal = true;
+                this.action = function (lsys: LSystem) { };
             }
             return [this];
         }

@@ -14,12 +14,26 @@ const MAX_DEPTH = 3;
 const HD_BLDG_ROUND = 1;
 const HD_BLDG_ALTERNATING = 2;
 
+const myColors = [
+    //vec4.fromValues(0.9, 0.9, 0.8, 1.0), // yellow
+    //vec4.fromValues(0.95, 0.8, 0.7, 1.0), // orange
+    vec4.fromValues(0.75, 0.75, 0.75, 1.0), // gray
+    vec4.fromValues(0.85, 0.85, 0.85, 1.0), // white
+    //vec4.fromValues(0.95, 0.75, 0.75, 1.0), // red
+    vec4.fromValues(0.85, 0.85, 0.97, 1.0), // blue
+    //vec4.fromValues(0.85, 0.95, 0.87, 1.0), // green
+    //vec4.fromValues(0.95, 0.75, 0.97, 1.0), // purple
+];
+
 export class HDCube extends GCube {
     flags: number;
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
         this.flags = 0;
+        // pick from a few random colors
+        let p = lRandom.getNext();
+        vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
     }
 
     spawnCopy(): HDCube {
