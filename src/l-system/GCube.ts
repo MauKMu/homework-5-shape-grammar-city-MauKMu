@@ -4,6 +4,7 @@ import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
 import {LSymbol} from './LSymbol';
 import {GSymbol, GShape} from './GSymbol';
+import {useTrueColor} from '../main';
 
 const INV_SQRT_TWO = 0.70710678118;
 
@@ -21,6 +22,7 @@ export class GCube extends GSymbol {
     // index is (2 * axis) + (min ? 0 : 1)
     isEdge: Array<boolean>;
     color: vec4;
+    trueColor: vec4;
     sides: number;
     // indexed like: [x, y, z]
     // how many times this has subdivided on this axis
@@ -42,6 +44,7 @@ export class GCube extends GSymbol {
 
         this.isEdge = [true, true, true, true, true, true];
         this.color = vec4.fromValues(1, 0.5, 0.5, 1);
+        this.trueColor = vec4.fromValues(0.8, 0.8, 0.8, 1);
         this.sides = 4;
         this.subdivCount = [0, 0, 0];
         this.subdivMin = 2;
@@ -64,7 +67,7 @@ export class GCube extends GSymbol {
             mat4.fromRotationTranslationScale(m, q, this.position, this.scale); 
 
             mat4.multiply(m, m, this.toUnitCube);
-            lsys.plant.useColor(this.color);
+            lsys.plant.useColor(this.getColor());
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);
@@ -77,6 +80,10 @@ export class GCube extends GSymbol {
             mat4.multiply(m, globalM, m);
             lsys.plant.addNormalCorrectPrism(m, this.sides, 1, this.scaleTop, 1);
         };
+    }
+
+    getColor(): vec4 {
+        return (useTrueColor) ? this.trueColor : this.color;
     }
 
     //canExpand(): boolean {

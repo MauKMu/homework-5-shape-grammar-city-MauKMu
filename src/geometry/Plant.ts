@@ -114,7 +114,7 @@ class Plant extends Drawable {
         const uv = vec2.fromValues(100, 100); // use this in shader to know vertex is from plane...
 
         for (let i = 0; i < 4; i++) {
-            let pos = vec4.fromValues(dims[0] * xFactor[i], 0, dims[1] * zFactor[i], 1);
+            let pos = vec4.fromValues(dims[0] * xFactor[i], -0.1, dims[1] * zFactor[i], 1);
             appendVec4ToArray(this.stagedPositions, pos);
             appendVec4ToArray(this.stagedColors, this.currColor);
             appendVec2ToArray(this.stagedUVs, uv);

@@ -22,6 +22,7 @@ export class MDCube extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        vec4.copy(c.trueColor, this.trueColor);
         c.subdivCount = this.subdivCount.slice();
         c.globalRotation = vec3.clone(this.globalRotation);
         c.globalTranslation = vec3.clone(this.globalTranslation);
@@ -88,6 +89,7 @@ export class MDCube extends GCube {
                     // convert to columns
                     let cyl = new MDCylinder("cyl", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
                     vec4.copy(cyl.color, this.color);
+                    vec4.copy(cyl.trueColor, this.trueColor);
                     cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
                     cyl.scale[2] = cyl.scale[0];
                     cyl.globalRotation = vec3.clone(this.globalRotation);

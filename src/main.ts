@@ -240,6 +240,9 @@ function updateFruit(fruit: FruitEnum) {
     }
 }
 
+let useTrueColor: boolean = true;
+export {useTrueColor};
+
 function bleh() {
     let axiom = new Array<LSymbol>();
 

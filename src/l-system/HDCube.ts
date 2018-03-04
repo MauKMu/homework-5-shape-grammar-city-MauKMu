@@ -27,6 +27,7 @@ export class HDCube extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        vec4.copy(c.trueColor, this.trueColor);
         c.subdivCount = this.subdivCount.slice();
         c.flags = this.flags;
         c.sides = this.sides;
@@ -82,6 +83,7 @@ export class HDCube extends GCube {
                     spike.sides = 12;
                     spike.globalTranslation = vec3.clone(this.globalTranslation);
                     spike.globalRotation = vec3.clone(this.globalRotation);
+                    vec4.copy(spike.trueColor, this.trueColor);
                     // delete self (not necessary if returning just spike?)
                     this.stringRepr = "0";
                     this.isTerminal = true;

@@ -11,10 +11,21 @@ import {GCube, EDGE_BACK, EDGE_BOT, EDGE_FRONT, EDGE_LEFT, EDGE_RIGHT, EDGE_TOP}
 
 const MAX_DEPTH = 3;
 
+const myColors = [
+    vec4.fromValues(0.9, 0.9, 0.8, 1.0),
+    vec4.fromValues(0.95, 0.8, 0.7, 1.0),
+    vec4.fromValues(0.85, 0.85, 0.85, 1.0),
+    vec4.fromValues(0.95, 0.75, 0.75, 1.0),
+    vec4.fromValues(0.85, 0.85, 0.97, 1.0),
+];
+
 export class LDCube extends GCube {
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
+        // pick from a few random colors
+        let p = lRandom.getNext();
+        vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
     }
 
     spawnCopy(): LDCube {
@@ -22,6 +33,7 @@ export class LDCube extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        vec4.copy(c.trueColor, this.trueColor);
         c.subdivCount = this.subdivCount.slice();
         c.globalRotation = vec3.clone(this.globalRotation);
         c.globalTranslation = vec3.clone(this.globalTranslation);
@@ -92,8 +104,8 @@ export class LDCube extends GCube {
             return arr;
         }
         else if (this.depth == 4 && this.isEdge[EDGE_TOP]) {
-            debugger;
             this.depth = 5;
+            /*
             // add chimney with small probability
             let chimney = new LDCube("chimney", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
             // make chimney square (from top)
@@ -105,6 +117,8 @@ export class LDCube extends GCube {
             chimney.isTerminal = true;
             chimney.depth = 5;
             return [this, chimney];
+            */
+            return [this];
         }
         this.isTerminal = true;
         return [this];

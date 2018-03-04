@@ -12,11 +12,21 @@ import {LDCube} from './LDCube';
 const INV_SQRT_THREE = 0.57735026919;
 const SQRT_THREE_OVER_SIX = 0.28867513459; // sqrt(3) / 6
 
+const myColors = [
+    vec4.fromValues(0.6, 0.2, 0.07, 1.0),
+    vec4.fromValues(0.7, 0.09, 0.02, 1.0),
+    vec4.fromValues(0.01, 0.05, 0.3, 1.0),
+    vec4.fromValues(0.01, 0.09, 0.03, 1.0),
+];
+
 export class LDRoof extends GCube {
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
         this.sides = 3;
+        // pick from a few random colors
+        let p = lRandom.getNext();
+        vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
 
         // use slightly different "toUnit" matrix
         let toUnitCubeQuat = quat.create();
@@ -35,6 +45,7 @@ export class LDRoof extends GCube {
         c.isEdge = this.isEdge.slice();
         c.depth = this.depth; 
         vec4.copy(c.color, this.color);
+        vec4.copy(c.trueColor, this.trueColor);
         c.globalRotation = vec3.clone(this.globalRotation);
         c.globalTranslation = vec3.clone(this.globalTranslation);
         return c;
@@ -63,6 +74,7 @@ export class LDRoof extends GCube {
             chimney.depth = 5;
             chimney.globalTranslation = vec3.clone(this.globalTranslation);
             chimney.globalRotation = vec3.clone(this.globalRotation);
+            vec4.copy(chimney.trueColor, this.trueColor);
             return [this, chimney];
         }
         return [this];
