@@ -1,4 +1,5 @@
 import {vec2, vec3, vec4} from 'gl-matrix';
+import {perlinSeed} from '../main';
 
 // Singleton class
 // https://k94n.com/es6-modules-single-instance-pattern
@@ -157,7 +158,7 @@ export function getFBMFromRawPosition(pos: vec2, startFreq: number): number {
     //vec2 coord = pos / 100.0;
     //coord += vec2(3.14, 5.01);
     let coord = vec2.clone(pos);
-    vec2.scaleAndAdd(coord, vec2.fromValues(3.14, 5.01), coord, 1 / 150.0);
+    vec2.scaleAndAdd(coord, vec2.fromValues(3.14 + perlinSeed, 5.01 + perlinSeed), coord, 1 / 150.0);
     //return Math.pow(Math.sin(coord[0] + coord[1]), 2.0);
     return getFBM(coord, startFreq);
 }

@@ -34,6 +34,8 @@ export class HDCube extends GCube {
         // pick from a few random colors
         let p = lRandom.getNext();
         vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
+        vec4.scale(this.trueColor, this.trueColor, 0.85);
+        this.trueColor[3] = 1;
     }
 
     spawnCopy(): HDCube {

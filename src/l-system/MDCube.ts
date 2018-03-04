@@ -38,6 +38,8 @@ export class MDCube extends GCube {
         // pick from a few random colors
         let p = lRandom.getNext();
         vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
+        vec4.scale(this.trueColor, this.trueColor, 0.91);
+        this.trueColor[3] = 1;
         // pick a number of floors
         this.floors = Math.ceil(lRandom.getNext() * 4) + 8;
     }
@@ -142,6 +144,7 @@ export class MDCube extends GCube {
                 let cyl = new MDCylinder("cyl", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
                 vec4.copy(cyl.color, this.color);
                 vec4.scale(cyl.trueColor, this.trueColor, 0.7);
+                cyl.trueColor[3] = 1;
                 //vec4.copy(cyl.trueColor, this.trueColor);
                 cyl.scale[0] = Math.min(cyl.scale[0], cyl.scale[2]) * 0.6;
                 cyl.scale[2] = cyl.scale[0];

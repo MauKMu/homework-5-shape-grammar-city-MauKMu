@@ -40,6 +40,7 @@ class ShaderProgram {
   unifPlumeBias: WebGLUniformLocation;
   unifEdgeClarity: WebGLUniformLocation;
   unifSampler0: WebGLUniformLocation;
+  unifPerlinSeed: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -70,6 +71,7 @@ class ShaderProgram {
     this.unifPlumeBias    = gl.getUniformLocation(this.prog, "u_PlumeBias");
     this.unifEdgeClarity  = gl.getUniformLocation(this.prog, "u_EdgeClarity");
     this.unifSampler0  = gl.getUniformLocation(this.prog, "u_Sampler0");
+    this.unifPerlinSeed  = gl.getUniformLocation(this.prog, "u_PerlinSeed");
   }
 
   use() {
@@ -181,6 +183,13 @@ class ShaderProgram {
     this.use();
     if (this.unifEdgeClarity !== -1) {
       gl.uniform1f(this.unifEdgeClarity, edgeClarity);
+    }
+  }
+
+  setPerlinSeed(perlinSeed: number) {
+    this.use();
+    if (this.unifPerlinSeed !== -1) {
+      gl.uniform1f(this.unifPerlinSeed, perlinSeed);
     }
   }
 

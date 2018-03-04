@@ -16,6 +16,7 @@ uniform vec4 u_Color; // The color with which to render this instance of geometr
 //uniform sampler2D u_Sampler0;
 
 uniform vec3 u_LightPos;
+uniform float u_PerlinSeed;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -91,7 +92,7 @@ float getFBM(vec2 pt, float startFreq) {
 // "normalizes" coordinate before calling FBM
 float getFBMFromRawPosition(vec2 pos, float startFreq) {
     vec2 coord = pos / 150.0;
-    coord += vec2(3.14, 5.01);
+    coord += vec2(3.14, 5.01) + vec2(u_PerlinSeed);
     //return pow(sin(coord.x + coord.y), 2.0);
     return getFBM(coord, startFreq);
 }

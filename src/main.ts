@@ -69,9 +69,12 @@ const controls = {
     fruit: FruitEnum.BANANA,
     'Show Alphabet': showAlphabet,
     'Show String': showCurrentString,
-    'Regenerate String and Plant': remakePlant,
-    'Redraw Plant': redrawPlant,
+    'Regenerate City': remakePlant,
+    'Redraw City': redrawPlant,
+    'Iterate': iterate,
     'Show Help': showHelp,
+    useDebugColor: true,
+    perlinSeed: 0,
 };
 
 let icosphere: Icosphere;
@@ -97,11 +100,13 @@ function showCurrentString() {
     swal(lsys.lstring.toString());
 }
 
-function showHelp() {
+function iterate() {
     lsys.resetPlant();
     lsys.expandString();
     lsys.createPlant();
-    /*
+}
+
+function showHelp() {
     swal(
         "Light Position: controls the light position for shading\n\n" +
         "iterations: number of times to expand the string\n\n" + 
@@ -113,11 +118,10 @@ function showHelp() {
         "**NOTE** any changes made to the options above will only be applied if you re-draw the plant using some of the buttons below\n\n" +
         "Show Alphabet: shows L-system's alphabet\n\n" +
         "Show String: shows current expanded L-system string\n\n" +
-        "Regenerate String and Plant: resets L-system string to axiom, re-expands it, then re-draws plant\n\n" +
-        "Redraw Plant: re-draws plant without modifying L-system string\n\n" +
+        "Regenerate City: resets L-system string to axiom, re-expands it, then re-draws plant\n\n" +
+        "Redraw City: re-draws plant without modifying L-system string\n\n" +
         "Show Help: shows this help message\n\n"
     );
-    */
 }
 
 function remakePlant() {
@@ -139,7 +143,7 @@ function remakePlant() {
 
 function redrawPlant() {
     // reset plant only, so we keep current string
-    updateFruit(controls.fruit);
+    //updateFruit(controls.fruit);
     lRandom.setSeed(controls.randomSeed);
     lsys.resetPlant();
     lsys.createPlant();
@@ -240,8 +244,11 @@ function updateFruit(fruit: FruitEnum) {
     }
 }
 
-let useTrueColor: boolean = true;
+let useTrueColor: boolean = !(controls.useDebugColor);
 export {useTrueColor};
+
+let perlinSeed: number = 0;
+export {perlinSeed};
 
 function bleh() {
     let axiom = new Array<LSymbol>();
@@ -881,17 +888,20 @@ function main() {
     lightFolder.add(controls, 'lightX');
     lightFolder.add(controls, 'lightY');
     lightFolder.add(controls, 'lightZ');
-    gui.add(controls, 'iterations').min(0).step(1);
+    //gui.add(controls, 'iterations').min(0).step(1);
     let randomModeController = gui.add(controls, 'randomMode', { "Math.random()": LRANDOM_MATH_RANDOM, "Seeded Noise": LRANDOM_DETERMINISTIC });
     let randomSeedController = gui.add(controls, 'randomSeed');
-    let woodColorController = gui.addColor(controls, 'woodColor');
-    let leafColorController = gui.addColor(controls, 'leafColor');
-    gui.add(controls, 'fruit', { "Banana": FruitEnum.BANANA, "Pineapple": FruitEnum.PINEAPPLE, '"Chinese Noodles"': FruitEnum.RAMEN, "Pizza": FruitEnum.PIZZA, "Cake": FruitEnum.CAKE });
-    gui.add(controls, 'Show Alphabet');
-    gui.add(controls, 'Show String');
-    gui.add(controls, 'Regenerate String and Plant');
-    gui.add(controls, 'Redraw Plant');
+    //let woodColorController = gui.addColor(controls, 'woodColor');
+    //let leafColorController = gui.addColor(controls, 'leafColor');
+    //gui.add(controls, 'fruit', { "Banana": FruitEnum.BANANA, "Pineapple": FruitEnum.PINEAPPLE, '"Chinese Noodles"': FruitEnum.RAMEN, "Pizza": FruitEnum.PIZZA, "Cake": FruitEnum.CAKE });
+    //gui.add(controls, 'Show Alphabet');
+    //gui.add(controls, 'Show String');
+    gui.add(controls, 'Regenerate City');
+    gui.add(controls, 'Redraw City');
+    gui.add(controls, 'Iterate');
     gui.add(controls, 'Show Help');
+    let useDebugColorController = gui.add(controls, 'useDebugColor');
+    gui.add(controls, 'perlinSeed').min(0).step(1);
 
 
     // Set up L-system event listeners
@@ -904,12 +914,16 @@ function main() {
         lRandom.setSeed(seed);
     });
 
-    woodColorController.onChange(function (color: Int32Array) {
-        vec4.set(BRANCH_COLOR, color[0] / 255, color[1] / 255, color[2] / 255, 1);
-    });
+    //woodColorController.onChange(function (color: Int32Array) {
+        //vec4.set(BRANCH_COLOR, color[0] / 255, color[1] / 255, color[2] / 255, 1);
+    //});
 
-    leafColorController.onChange(function (color: Int32Array) {
-        vec4.set(TIP_COLOR, color[0] / 255, color[1] / 255, color[2] / 255, 1);
+    //leafColorController.onChange(function (color: Int32Array) {
+        //vec4.set(TIP_COLOR, color[0] / 255, color[1] / 255, color[2] / 255, 1);
+    //});
+
+    useDebugColorController.onChange(function (val: boolean) {
+        useTrueColor = !val;
     });
 
     // get canvas and webgl context
@@ -1001,9 +1015,11 @@ function main() {
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         renderer.clear();
         renderer.setLightPos(vec3.fromValues(controls.lightX, controls.lightY, controls.lightZ));
-        renderer.setLavaBias(controls.lavaBias / 100);
-        renderer.setPlumeBias(controls.plumeBias / 100);
-        renderer.setEdgeClarity(controls.edgeClarity / 100);
+        //renderer.setLavaBias(controls.lavaBias / 100);
+        //renderer.setPlumeBias(controls.plumeBias / 100);
+        //renderer.setEdgeClarity(controls.edgeClarity / 100);
+        lambert.setPerlinSeed(controls.perlinSeed);
+        perlinSeed = controls.perlinSeed;
         renderer.render(camera, shaders[controls.shader], [
             // icosphere,
             // square,
