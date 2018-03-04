@@ -37,6 +37,10 @@ If you change the Perlin seed, you will modify the general structure of the city
 
 ## Techniques Used
 
+### General Inspiration
+
+Broadly speaking, I was inspired by games like SimCity 4, in which you can have low, medium, or high-density buildings. In SC4, there is another orthogonal set of categories for buildings (residential, commercial, industrial), but I chose to only implement residential-like buildings for this demo.
+
 ### Building Shape Grammar
 
 Below is a list of each symbol, as well as a description of how it expands with each iteration. Unless otherwise mentioned, the number of cubes a cube is subdivided into is randomly chosen.
@@ -44,6 +48,8 @@ Below is a list of each symbol, as well as a description of how it expands with 
 There are three types of building: low, medium, and high-density buildings. The density here refers to populational density.
 
 Note each symbol stores how many times it has been expanded, which is how the symbols know whether they are on the first iteration, or the second one, etc. Each symbol also keeps track of whether it's part of the edges of the building (i.e. whether it lies on the faces of the original undivided cube).
+
+Each symbol also stores other useful information, like position, rotation, scale, as well as more specific values in each subclass.
 
 * `LDCube`: Base for low-density buildings. A cube.
   * For the first two iterations, will subdivide itself into smaller `LDCubes` in the X and Z directions. Each subdivision will be in a different direction, but which one happens first (X or Z) is random.
@@ -113,8 +119,12 @@ Here is the process used to place buildings on the scene:
   * Else, `fbm` is high, so:
     * Place a high-density building with high probability.
     * Else, place a medium-density building (with the remaining low probability).
+* Building heights are affected by which of the three categories above they belong to, i.e. medium-density buildings in a low-`fbm` area are slightly shorter than medium-density buildings in a mid-`fbm` area, and significantly shorter than those in a high-`fbm` area.
+    * The point of this is to allow for a smoother transition between the `fbm` categories.
+* Note the probabilities mentioned above are scaled by where the `fbm` lies within its category (i.e. if the `fbm` is close to the threshold between low and mid, the probability for a low-`fbm` area will be weighed towards medium-density buildings).
+    * This also serves to promote smoother transitions.
 
-### Colors
+### Building Colors
 
 * If using "debug" colors:
   * Low-density buildings are blue.
@@ -123,6 +133,10 @@ Here is the process used to place buildings on the scene:
   * As a symbol subdivides itself, it will darken its color, with sub-blocks farther from the original block being darker.
 * Else, using "regular" colors:
   * Each symbol has a set of colors it randomly picks upon being constructed. This color is inherited by its children.
+
+### Ground Plane Color
+
+* A "procedural texture" is used that takes into account the `fbm` value at the fragment. This determines how green it is, and whether it has a street on it.
 
 ## Original README below
 
