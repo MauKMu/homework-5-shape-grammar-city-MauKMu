@@ -1252,17 +1252,13 @@ function iterate() {
 }
 function showHelp() {
     __WEBPACK_IMPORTED_MODULE_12_sweetalert__("Light Position: controls the light position for shading\n\n" +
-        "iterations: number of times to expand the string\n\n" +
         "randomMode: pick between using Math.random() or a deterministic seeded noise function\n\n" +
         "randomSeed: seed for deterministic seeded noise function\n\n" +
-        "woodColor: color for wood geometry\n\n" +
-        "leafColor: color for leaf geometry\n\n" +
-        "fruit: pick one decoration to be placed on the branches (some non-fruity decorations may require more determination)\n\n" +
-        "**NOTE** any changes made to the options above will only be applied if you re-draw the plant using some of the buttons below\n\n" +
-        "Show Alphabet: shows L-system's alphabet\n\n" +
-        "Show String: shows current expanded L-system string\n\n" +
-        "Regenerate City: resets L-system string to axiom, re-expands it, then re-draws plant\n\n" +
-        "Redraw City: re-draws plant without modifying L-system string\n\n" +
+        "**NOTE** any changes made to the options above will only be applied if you re-draw the city using some of the buttons below\n\n" +
+        "useDebugColor: pick between using debug or regular colors\n\n" +
+        "perlinSeed: seed for Perlin noise\n\n" +
+        "Regenerate City: resets city string, re-expands it, then re-draws city\n\n" +
+        "Redraw City: re-draws city without modifying string\n\n" +
         "Show Help: shows this help message\n\n");
 }
 function remakePlant() {
