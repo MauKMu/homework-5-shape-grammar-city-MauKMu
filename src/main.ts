@@ -121,10 +121,12 @@ function showHelp() {
 }
 
 function remakePlant() {
-    updateFruit(controls.fruit);
+    //updateFruit(controls.fruit);
     lRandom.setSeed(controls.randomSeed);
-    lsys.resetSystem();
-    runIterations(controls.iterations);
+    lsys.resetPlant();
+    bleh();
+    //lsys.resetSystem();
+    //runIterations(controls.iterations);
     // expanding string also consumes RNG, so
     // we reset seed again to make this output consistent
     // with redrawPlant()
@@ -278,7 +280,7 @@ function bleh() {
                 if (p < 0.1) {
                     // no bldg
                 }
-                else if (p < 0.8) {
+                else if (p < 0.7) {
                     bldg = new LDCube("LD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
                     bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
                     bldg.globalRotation = vec3.fromValues(0, lRandom.getNext() * 90 - 45, 0);
@@ -294,7 +296,7 @@ function bleh() {
                 // mid-density area ===========================================
                 // moslty MD, some LD, some HD
                 let p = lRandom.getNext() * (fbm - LD_THRESHOLD) / (MD_THRESHOLD - LD_THRESHOLD);
-                if (p < 0.15) {
+                if (p < 0.075) {
                     bldg = new LDCube("LD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 12, 4));
                     bldg.color = vec4.fromValues(0.4, 0.4, 1.0 - fbm, 1);
                     bldg.color = vec4.fromValues(0.4, fbm + 0.23, 0.4, 1);
@@ -316,7 +318,7 @@ function bleh() {
                 // mostly HD, some MD
                 let p = lRandom.getNext() * (fbm - MD_THRESHOLD) / (1.0 - MD_THRESHOLD);
                 //console.log(["p: ", p]);
-                console.log(["fbm: ", fbm]);
+                //console.log(["fbm: ", fbm]);
                 //console.log(["scale: ", (fbm - MD_THRESHOLD) / (1.0 - MD_THRESHOLD)]);
                 if (p < 0.1) {
                     bldg = new MDCube("MD", vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 0), vec3.fromValues(4, 1 + fbm * 40, 4));

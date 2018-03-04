@@ -122,8 +122,23 @@ void main()
         // handle ground plane
         if (fs_UV.x > 99.99) {
             float fbm = getFBMFromRawPosition(fs_Pos.xz, 0.5);
+            // remap FBM because it's apparently in [0.25, 0.65]
+            fbm = (fbm - 0.25) / 0.4;
+            float biasedFBM = fbm * 1.5;
+            vec3 palette = mix(vec3(0.04, 0.5, 0.12), vec3(0.53, 0.53, 0.53), min(1.0, biasedFBM));
+            float fbmAux = getFBMFromRawPosition(fs_Pos.xz + vec2(9.91, -4.33), 1.0);
+            fbmAux = min(1.0, (fbmAux - 0.25) / 0.4 + 0.5);
+            fbmAux = mix(fbmAux, 1.0, smoothstep(0.6, 1.1, biasedFBM));
             //fbm = pow(fbm, 2.0);
             out_Col = vec4(vec3(fbm), 1);
+            float streetiness = smoothstep(0.2, 0.5, biasedFBM);
+            vec3 streetColor = palette;
+            if ((mod(fs_Pos.x + 3.5, 150.0 / 45.0 * 2.0) < 1.0) ||
+                (mod(fs_Pos.z + 3.5, 150.0 / 45.0 * 2.0) < 1.0)) {
+                streetColor = vec3(0.1, 0.1, 0.1);
+            }
+            palette = mix(palette, streetColor, streetiness);
+            out_Col = vec4(palette * fbmAux, 1); 
             //out_Col = vec4((fs_Pos.xz / 50.0) * 0.5 + vec2(0.5), 0.0, 1.0);
         }
         //out_Col = vec4(fs_Nor.xyz * 0.5 + vec3(0.5), 1.0);

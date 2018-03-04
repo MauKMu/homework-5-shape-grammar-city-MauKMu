@@ -127,16 +127,17 @@ export class GCube extends GSymbol {
     
         arr.push(this);
 
-        let factor = 0.85;
+        let factor = 0.9;
 
         for (let i = 1; i < subdivs; i++) {
             //let pos = vec3.clone(this.position);
             //pos[axis] += i * increment;
             let c = this.spawnCopy();
             c.position[axis] += i * increment;
+            c.color[0] *= factor;
             c.color[1] *= factor;
             c.color[2] *= factor;
-            factor *= 0.85;
+            factor *= 0.9;
             //let c = new MDCube("A", pos, vec3.clone(this.rotation), vec3.clone(this.scale));
             //c.depth = this.depth;
             arr.push(c);
