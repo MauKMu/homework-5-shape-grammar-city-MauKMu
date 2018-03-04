@@ -11,10 +11,23 @@ import {GCube, EDGE_BACK, EDGE_BOT, EDGE_FRONT, EDGE_LEFT, EDGE_RIGHT, EDGE_TOP}
 
 const MAX_DEPTH = 4;
 
+const myColors = [
+    //vec4.fromValues(0.9, 0.9, 0.8, 1.0), // yellow
+    //vec4.fromValues(0.95, 0.8, 0.7, 1.0), // orange
+    vec4.fromValues(0.85, 0.85, 0.85, 1.0), // white
+    //vec4.fromValues(0.95, 0.75, 0.75, 1.0), // red
+    vec4.fromValues(0.85, 0.85, 0.97, 1.0), // blue
+    vec4.fromValues(0.85, 0.95, 0.87, 1.0), // green
+    //vec4.fromValues(0.95, 0.75, 0.97, 1.0), // purple
+];
+
 export class MDCube extends GCube {
 
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale);
+        // pick from a few random colors
+        let p = lRandom.getNext();
+        vec4.copy(this.trueColor, myColors[Math.floor(p * 0.99999 * myColors.length)]);
     }
 
     spawnCopy(): MDCube {
@@ -62,7 +75,7 @@ export class MDCube extends GCube {
         }
         else if (this.depth == 2) {
             // delete with moderate chance
-            if (p < 0.3 && this.isCorner()) {
+            if ((p < 0.3 && this.isCorner()) || (p < 0.15 && !this.isOuterXZ())) {
                 // "delete" self
                 this.stringRepr = "0";
                 this.isTerminal = true;
@@ -81,7 +94,7 @@ export class MDCube extends GCube {
             // try deleting twice based on Y division
             this.depth += 1;
             if (p < 0.3) {
-                if (this.isEdge[EDGE_BOT] && !this.isEdge[EDGE_TOP]) {
+                if (!this.isEdge[EDGE_TOP]) {
                     // "delete" self
                     this.stringRepr = "0";
                     this.isTerminal = true;
@@ -96,7 +109,7 @@ export class MDCube extends GCube {
                     cyl.globalTranslation = vec3.clone(this.globalTranslation);
                     return [cyl];
                 }
-                else if (this.isCorner() && this.isEdge[EDGE_TOP]) {// && this.isEdge[EDGE_TOP]) {  
+                else if (this.isCorner() && !this.isEdge[EDGE_BOT]) {// && this.isEdge[EDGE_TOP]) {  
                     // delete self
                     this.stringRepr = "0";
                     this.isTerminal = true;
