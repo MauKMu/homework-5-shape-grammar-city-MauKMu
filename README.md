@@ -1,6 +1,105 @@
 
 # Project 5: Shape Grammar
 
+## Student Info
+
+* Name: Mauricio Mutai
+* PennKey: `mmutai`
+
+## Demo
+
+Click below to go to the demo!
+
+[![](images/example.png)](https://maukmu.github.io/homework-5-shape-grammar-city-MauKMu)
+
+## Controls
+
+Below is an explanation of how to use the controls in the demo. A similar explanation of the controls can be accessed by clicking "Show Help" in the demo. Note that, unless otherwise specified, changes will only become visible if you redraw the city using `Regenerate City` or `Redraw City`.
+
+* `Light Position`: Changes the light position for shading. Updates automatically (redrawing plant is not needed).
+* `randomMode`: Changes how "random" numbers are generated. The options are `Math.random()` and a deterministic seeded noise function. Using the seeded noise function is recommended if you want to redraw the same plant while tweaking other parameters, such as colors and fruit.
+* `randomSeed`: Changes the seed for the deterministic seeded noise function.
+* `useDebugColor`: Toggles between using "debug colors" or "regular colors". See more below.
+* `perlinSeed`: Changes the seed for the Perlin noise function.
+* `Regenerate City`: Regenerates shape grammar string, re-expands it, then redraws city.
+* `Redraw City`: Redraws city without modifying shape grammar string. Note that if your `randomMode` is `Math.random()`, you will get different results, although the general structure of the city will still be the same. Similarly, using the seeded noise function and changing the seed will lead to different results.
+* `Show Help`: Shows a help message.
+
+If you change the Perlin seed, you will modify the general structure of the city (this will modify the population density distribution). Redrawing the city without changing the Perlin seed will only lead to small changes local to each building.
+
+## Techniques Used
+
+### Building Shape Grammar
+
+Below is a list of each symbol, as well as a description of how it expands with each iteration. Unless otherwise mentioned, the number of cubes a cube is subdivided into is randomly chosen.
+
+There are three types of building: low, medium, and high-density buildings. The density here refers to populational density.
+
+Note each symbol stores how many times it has been expanded, which is how the symbols know whether they are on the first iteration, or the second one, etc. Each symbol also keeps track of whether it's part of the edges of the building (i.e. whether it lies on the faces of the original undivided cube).
+
+* `LDCube`: Base for low-density buildings. A cube.
+  * For the first two iterations, will subdivide itself into smaller `LDCubes` in the X and Z directions. Each subdivision will be in a different direction, but which one happens first (X or Z) is random.
+  * For the third iteration, will delete itself with a small chance. 
+  * For the fourth iteration, will subdivide along Y once and transform the topmost `LDCube` into an `LDRoof`. After this, all `LDCubes` become terminal.
+* `LDRoof`: A roof for low-density buildings. A triangular prism.
+  * For the first iteration, has a small chance to add a chimney (small scaled cube). After this, becomes terminal.
+* `MDCube`: Base for medium-density buildings. A cube.
+  * For the first two iterations, will subdivide itself into smaller `LDCubes` in the X and Z directions. Each subdivision will be in a different direction, but which one happens first (X or Z) is random.
+  * For the third iteration, does the following:
+    * Attempt to delete itself if:
+      * This is a "corner" block, with low probability. 
+      * This is an "outer" block, with lower probability. 
+    * If the block does not delete itself, then it will:
+      * Subdivide itself along Y. The number of sub-blocks is the same within each building, but varies across buildings.
+      * With low probability, mark a random number of the bottommost blocks as columns.
+      * With low probability, mark a random number of the topmost blocks as deleted.
+      * Scale every other sub-block (along Y) in order to create some "texture".
+  * For the fourth iteration, if this block is marked as a column, replace itself with an `MDCylinder`.
+  * For the fifth iteration, if this block is marked as deleted, delete itself.
+* `MDCylinder`: A column used in medium-density buildings. An octagonal prism.
+    * This is a terminal symbol.
+* `HDCube`: Base for high-density buildings. Initially a cube; may become an octagonal prism.
+    * For the first iteration, does the following:
+      * Randomly decide if this will be a round or rectangular building.
+        * If this is a round building, converts itself into an octagonal prism.
+      * Randomly decide if this will be a straight or "alternating" building.
+      * Subdivide itself along Y.
+    * For the second iteration, does the following:
+      * If this is a "top" block, converts itself into a spike with a moderate-high chance. The spike is a dodecagonal prism with the top scaled to be significantly smaller than the bottom.
+      * Else, if this is an "alternating" building:
+        * Subdivide itself along Y such that an odd number of sub-blocks is generated, including the original block.
+        * Scale every other block in order to create some "texture".
+
+### Building Layout
+
+Here is the process used to place buildings on the scene:
+
+* On a uniform grid (the top of the ground plane), for each point on the grid:
+  * Sample FBM'd Perlin noise at the point. This value, `fbm`, is interpreted as the populational density at that point.
+  * If `fbm` is low:
+    * Place a low-density building with high probability.
+    * Place a medium-density building with low probability.
+    * Else, place no building (with the remaining low probability).
+  * Else, if `fbm` is mid-range:
+    * Place a medium-density building with high probability.
+    * Place a low-density building with low probability.
+    * Else, place a high-density building (with the remaining low probability).
+  * Else, `fbm` is high, so:
+    * Place a high-density building with high probability.
+    * Else, place a medium-density building (with the remaining low probability).
+
+### Colors
+
+* If using "debug" colors:
+  * Low-density buildings are blue.
+  * Medium-density buildings are green.
+  * High-density buildings are red.
+  * As a symbol subdivides itself, it will darken its color, with sub-blocks farther from the original block being darker.
+* Else, using "regular" colors:
+  * Each symbol has a set of colors it randomly picks upon being constructed. This color is inherited by its children.
+
+## Original README below
+
 For this assignment you'll be building directly off of the L-system code you
 wrote last week.
 
