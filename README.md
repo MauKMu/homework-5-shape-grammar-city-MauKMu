@@ -92,7 +92,7 @@ When a symbol adds windows to itself, it essentially gives itself different UVs.
 
 ### Building Shape Grammar - Examples
 
-Note that the images below, except for the last one, show buildings without windows.
+Note that the images below, except for the last two, show buildings without windows.
 
 Low-density:
 
@@ -113,6 +113,10 @@ High-density (from bottom):
 Buildings with windows:
 
 ![](images/windows.png)
+
+Buildings with windows, "anti-aliasing" enabled:
+
+![](images/windows-AA.png)
 
 ### Building Layout
 

@@ -134,6 +134,29 @@ void main()
                         out_Col = vec4(1, 1, 0.85, 1);
                     }
                 }
+                else if (0.25 < modUV.x && modUV.x < 0.75 && 0.25 < modUV.y && modUV.y < 0.75) {
+                    float mX = 1.0;
+                    if (modUV.x < 0.35) {
+                        mX = smoothstep(0.30, 0.35, modUV.x);
+                    }
+                    else if (modUV.x > 0.65) {
+                        mX = 1.0 - smoothstep(0.65, 0.70, modUV.x);
+                    }
+                    float mY = 1.0;
+                    if (modUV.y < 0.35) {
+                        mY = smoothstep(0.30, 0.35, modUV.y);
+                    }
+                    else if (modUV.y > 0.65) {
+                        mY = 1.0 - smoothstep(0.65, 0.70, modUV.y);
+                    }
+
+                    if (fs_UV.x > 249.99) {
+                        out_Col = mix(out_Col, vec4(0.3, 0.3, 0.3, 1), min(mX, mY));
+                    }
+                    else {
+                        out_Col = mix(out_Col, vec4(1, 1, 0.85, 1), min(mX, mY));
+                    }
+                }
             }
         }
         // handle ground plane
