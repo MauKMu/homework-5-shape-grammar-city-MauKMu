@@ -391,11 +391,11 @@ class Plant extends Drawable {
                 vec4.transformMat4(localPos, localPos, rotMat4);
 
                 // append indices to make faces
-                appendTri(this.stagedIndices, idxStart, idxStart + 1 + i, idxStart + 2 + i);
+                appendTri(this.stagedIndices, idxStart + 1 + i, idxStart, idxStart + 2 + i);
             }
             else {
                 // append indices to make faces -- edge case
-                appendTri(this.stagedIndices, idxStart, idxStart + sides, idxStart + 1);
+                appendTri(this.stagedIndices, idxStart + sides, idxStart, idxStart + 1);
             }
         }
 
@@ -509,14 +509,14 @@ class Plant extends Drawable {
                 // append indices to make faces
                 // adjusts start index to account for i (# of sides added so far)
                 let adjStart = idxStart + 4 * i;
-                appendTri(this.stagedIndices, adjStart + 1, adjStart + 4, adjStart + 3);
-                appendTri(this.stagedIndices, adjStart + 3, adjStart + 4, adjStart + 6);
+                appendTri(this.stagedIndices, adjStart + 1, adjStart + 3, adjStart + 4);
+                appendTri(this.stagedIndices, adjStart + 4, adjStart + 3, adjStart + 6);
             }
             else {
                 // append indices to make faces -- edge case
                 let adjStart = idxStart + 4 * i;
-                appendTri(this.stagedIndices, adjStart + 1, idxStart, adjStart + 3);
-                appendTri(this.stagedIndices, adjStart + 3, idxStart, idxStart + 2);
+                appendTri(this.stagedIndices, adjStart + 1, adjStart + 3, idxStart);
+                appendTri(this.stagedIndices, adjStart + 3, idxStart + 2, idxStart);
             }
         }
     }

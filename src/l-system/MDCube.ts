@@ -166,11 +166,15 @@ export class MDCube extends GCube {
         }
         else if (this.depth == 5) {
             this.depth += 1;
+            let turnOff = 0;
+            if (p < 0.2) {
+                turnOff = 50;
+            }
             this.sideUVs = [
-                vec2.fromValues(201, 201), // top-right
-                vec2.fromValues(200, 201), // top-left
-                vec2.fromValues(201, 200), // bottom-right
-                vec2.fromValues(200, 200), // bottom-left
+                vec2.fromValues(201 + turnOff, 201), // top-right
+                vec2.fromValues(200 + turnOff, 201), // top-left
+                vec2.fromValues(201 + turnOff, 200), // bottom-right
+                vec2.fromValues(200 + turnOff, 200), // bottom-left
             ];
             return [this];
         }

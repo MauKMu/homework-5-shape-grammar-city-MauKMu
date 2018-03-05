@@ -1,4 +1,4 @@
-import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
+import {vec2, vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
@@ -103,21 +103,23 @@ export class LDCube extends GCube {
             arr[arr.length - 1] = roof;
             return arr;
         }
-        else if (this.depth == 4 && this.isEdge[EDGE_TOP]) {
-            this.depth = 5;
-            /*
-            // add chimney with small probability
-            let chimney = new LDCube("chimney", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
-            // make chimney square (from top)
-            chimney.scale[0] = Math.min(this.scale[0], this.scale[2]) * 0.4;
-            chimney.scale[2] = chimney.scale[0];
-            // move chimney
-            chimney.position[0] += this.scale[0] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.position[2] += this.scale[2] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.isTerminal = true;
-            chimney.depth = 5;
-            return [this, chimney];
-            */
+        else if (this.depth == 4) {
+            this.depth += 1;
+            let turnOff = 0;
+            if (p < 0.5) {
+                turnOff = 50;
+            }
+            p = lRandom.getNext()
+            // boost chance of windows at bottom
+            p -= this.isEdge[EDGE_BOT] ? 0.2 : 0.0;
+            if (p < 0.3333) {
+                this.sideUVs = [
+                    vec2.fromValues(202 + turnOff, 201), // top-right
+                    vec2.fromValues(200 + turnOff, 201), // top-left
+                    vec2.fromValues(202 + turnOff, 200), // bottom-right
+                    vec2.fromValues(200 + turnOff, 200), // bottom-left
+                ];
+            }
             return [this];
         }
         this.isTerminal = true;

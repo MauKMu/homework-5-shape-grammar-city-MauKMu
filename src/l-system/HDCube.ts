@@ -1,4 +1,4 @@
-import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
+import {vec2, vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
@@ -130,6 +130,32 @@ export class HDCube extends GCube {
                 (<GCube>arr[i]).scale[2] *= scale;
             }
             return arr;
+        }
+        else if (this.depth == 2) {
+            this.depth += 1;
+            const isAlternating = this.flags & HD_BLDG_ALTERNATING;
+            let turnOff = 0;
+            if (isAlternating && p < 0.05) {
+                turnOff = 50;
+            }
+            if (isAlternating) {
+                this.sideUVs = [
+                    vec2.fromValues(202 + turnOff, 201), // top-right
+                    vec2.fromValues(200 + turnOff, 201), // top-left
+                    vec2.fromValues(202 + turnOff, 200), // bottom-right
+                    vec2.fromValues(200 + turnOff, 200), // bottom-left
+                ];
+            }
+            else {
+                // make UV's V huge to make up for fewer subdivisions
+                this.sideUVs = [
+                    vec2.fromValues(202 + turnOff, 205), // top-right
+                    vec2.fromValues(200 + turnOff, 205), // top-left
+                    vec2.fromValues(202 + turnOff, 200), // bottom-right
+                    vec2.fromValues(200 + turnOff, 200), // bottom-left
+                ];
+            }
+            return [this];
         }
         this.isTerminal = true;
         return [this];

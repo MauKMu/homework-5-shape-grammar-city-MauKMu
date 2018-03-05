@@ -75,6 +75,7 @@ const controls = {
     'Show Help': showHelp,
     useDebugColor: true,
     perlinSeed: 0,
+    showWindows: true,
 };
 
 let icosphere: Icosphere;
@@ -898,6 +899,7 @@ function main() {
     gui.add(controls, 'Show Help');
     let useDebugColorController = gui.add(controls, 'useDebugColor');
     gui.add(controls, 'perlinSeed').min(0).step(1);
+    let showWindowsController = gui.add(controls, 'showWindows');
 
 
     // Set up L-system event listeners
@@ -945,6 +947,8 @@ function main() {
     renderer = new OpenGLRenderer(canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
     gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
 
     // Set up event listener for color change
     //colorController.onChange(function (color: Int32Array) {
@@ -1016,6 +1020,7 @@ function main() {
         //renderer.setEdgeClarity(controls.edgeClarity / 100);
         lambert.setPerlinSeed(controls.perlinSeed);
         perlinSeed = controls.perlinSeed;
+        lambert.setShowWindows(controls.showWindows);
         renderer.render(camera, shaders[controls.shader], [
             // icosphere,
             // square,

@@ -17,6 +17,7 @@ uniform vec4 u_Color; // The color with which to render this instance of geometr
 
 uniform vec3 u_LightPos;
 uniform float u_PerlinSeed;
+uniform int u_ShowWindows;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -122,10 +123,17 @@ void main()
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
         // handle windows
         if (fs_UV.x > 199.99) {
-            vec2 uv = fs_UV - vec2(200.0);
-            vec2 modUV = fract(uv);
-            if (0.3 < modUV.x && modUV.x < 0.7 && 0.3 < modUV.y && modUV.y < 0.7) {
-                out_Col = vec4(1, 1, 0.5, 1);
+            if (u_ShowWindows > 0) {
+                vec2 uv = fs_UV - vec2(200.0);
+                vec2 modUV = fract(uv);
+                if (0.35 < modUV.x && modUV.x < 0.65 && 0.35 < modUV.y && modUV.y < 0.65) {
+                    if (fs_UV.x > 249.99) {
+                        out_Col = vec4(0.3, 0.3, 0.3, 1);
+                    }
+                    else {
+                        out_Col = vec4(1, 1, 0.85, 1);
+                    }
+                }
             }
         }
         // handle ground plane
