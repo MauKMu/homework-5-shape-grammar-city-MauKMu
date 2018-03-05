@@ -16,7 +16,7 @@ Click below to go to the demo!
 
 * Move camera to desired position.
 * Toggle `useDebugColor` if you want a more colorful experience.
-* Click on `Iterate` six times (after the second one, iterations may be a bit slow). You will know when to stop once all types of buildings have bright windows on them.
+* Click on `Iterate` six times (after the second one, iterations may be a bit slow). You can stop once all types of buildings have bright windows on them.
 * Enjoy.
 * You can modify the `perlinSeed`, click on `Regenerate City`, then iterate five times again if you want to see the city built on a different population density distribution.
 
