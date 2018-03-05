@@ -446,6 +446,7 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
         this.currColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].copy(this.currColor, BRANCH_COLOR);
         this.wasSafe = true;
+        this.currSideUVs = [];
     }
     isSafeToGrow() {
         this.wasSafe = this.stagedPositions.length < 12800000;
@@ -464,6 +465,20 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
     }
     useColor(color) {
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].copy(this.currColor, color);
+    }
+    useSideUVs(sideUVs) {
+        this.currSideUVs = [];
+        sideUVs.forEach(function (value) {
+            this.currSideUVs.push(__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].clone(value));
+        }, this);
+    }
+    appendSideUVsToArray(arr, defaultUV, idx) {
+        if (this.currSideUVs.length > idx) {
+            appendVec2ToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].clone(this.currSideUVs[idx]));
+        }
+        else {
+            appendVec2ToArray(this.stagedUVs, defaultUV);
+        }
     }
     // hardcoded XZ plane
     addPlane(dims) {
@@ -684,11 +699,11 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
                 // rotate local position
                 __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].transformMat4(localPos, localPos, rotMat4);
                 // append indices to make faces
-                appendTri(this.stagedIndices, idxStart, idxStart + 1 + i, idxStart + 2 + i);
+                appendTri(this.stagedIndices, idxStart + 1 + i, idxStart, idxStart + 2 + i);
             }
             else {
                 // append indices to make faces -- edge case
-                appendTri(this.stagedIndices, idxStart, idxStart + sides, idxStart + 1);
+                appendTri(this.stagedIndices, idxStart + sides, idxStart, idxStart + 1);
             }
         }
         // add top ============================================
@@ -752,19 +767,19 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].transformMat4(p, localPosTop, transform);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1), 0);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1), 1);
             // transform and append position -- bottom
             //vec4.set(localPosBot, localPosTop[0], 0, localPosTop[2], 1);
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].transformMat4(p, localPosBot, transform);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1), 2);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(-1, -1), 3);
             // transform and append normal (need to append twice)
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].transformMat3(n, localNor, invTr);
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].normalize(n, n);
@@ -783,14 +798,14 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
                 // append indices to make faces
                 // adjusts start index to account for i (# of sides added so far)
                 let adjStart = idxStart + 4 * i;
-                appendTri(this.stagedIndices, adjStart + 1, adjStart + 4, adjStart + 3);
-                appendTri(this.stagedIndices, adjStart + 3, adjStart + 4, adjStart + 6);
+                appendTri(this.stagedIndices, adjStart + 1, adjStart + 3, adjStart + 4);
+                appendTri(this.stagedIndices, adjStart + 4, adjStart + 3, adjStart + 6);
             }
             else {
                 // append indices to make faces -- edge case
                 let adjStart = idxStart + 4 * i;
-                appendTri(this.stagedIndices, adjStart + 1, idxStart, adjStart + 3);
-                appendTri(this.stagedIndices, adjStart + 3, idxStart, idxStart + 2);
+                appendTri(this.stagedIndices, adjStart + 1, adjStart + 3, idxStart);
+                appendTri(this.stagedIndices, adjStart + 3, idxStart + 2, idxStart);
             }
         }
     }
@@ -840,22 +855,22 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
 
 const INV_SQRT_TWO = 0.70710678118;
 const EDGE_LEFT = 0;
-/* harmony export (immutable) */ __webpack_exports__["c"] = EDGE_LEFT;
+/* harmony export (immutable) */ __webpack_exports__["d"] = EDGE_LEFT;
 
 const EDGE_RIGHT = 1;
-/* harmony export (immutable) */ __webpack_exports__["d"] = EDGE_RIGHT;
+/* harmony export (immutable) */ __webpack_exports__["e"] = EDGE_RIGHT;
 
 const EDGE_BOT = 2;
-/* unused harmony export EDGE_BOT */
+/* harmony export (immutable) */ __webpack_exports__["b"] = EDGE_BOT;
 
 const EDGE_TOP = 3;
-/* harmony export (immutable) */ __webpack_exports__["e"] = EDGE_TOP;
+/* harmony export (immutable) */ __webpack_exports__["f"] = EDGE_TOP;
 
 const EDGE_BACK = 4;
 /* harmony export (immutable) */ __webpack_exports__["a"] = EDGE_BACK;
 
 const EDGE_FRONT = 5;
-/* harmony export (immutable) */ __webpack_exports__["b"] = EDGE_FRONT;
+/* harmony export (immutable) */ __webpack_exports__["c"] = EDGE_FRONT;
 
 class GCube extends __WEBPACK_IMPORTED_MODULE_3__GSymbol__["b" /* GSymbol */] {
     constructor(stringRepr, position, rotation, scale) {
@@ -872,6 +887,7 @@ class GCube extends __WEBPACK_IMPORTED_MODULE_3__GSymbol__["b" /* GSymbol */] {
         this.scaleTop = 1;
         this.subdivMustBeOdd = false;
         this.subdivMustBeEven = false;
+        this.sideUVs = [];
         this.toUnitCube = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         let toUnitCubeQuat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* quat */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* quat */].fromEuler(toUnitCubeQuat, 0, 45, 0);
@@ -885,6 +901,7 @@ class GCube extends __WEBPACK_IMPORTED_MODULE_3__GSymbol__["b" /* GSymbol */] {
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotationTranslationScale(m, q, this.position, this.scale);
             __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].multiply(m, m, this.toUnitCube);
             lsys.plant.useColor(this.getColor());
+            lsys.plant.useSideUVs(this.sideUVs);
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);
@@ -973,7 +990,7 @@ class GCube extends __WEBPACK_IMPORTED_MODULE_3__GSymbol__["b" /* GSymbol */] {
         return (this.isEdge[EDGE_LEFT] || this.isEdge[EDGE_RIGHT]) && (this.isEdge[EDGE_BACK] || this.isEdge[EDGE_FRONT]);
     }
 }
-/* harmony export (immutable) */ __webpack_exports__["f"] = GCube;
+/* harmony export (immutable) */ __webpack_exports__["g"] = GCube;
 
 ;
 //export default ExpansionRule;
@@ -1226,6 +1243,7 @@ const controls = {
     'Show Help': showHelp,
     useDebugColor: true,
     perlinSeed: 0,
+    showWindows: true,
 };
 let icosphere;
 let square;
@@ -1990,6 +2008,7 @@ function main() {
     gui.add(controls, 'Show Help');
     let useDebugColorController = gui.add(controls, 'useDebugColor');
     gui.add(controls, 'perlinSeed').min(0).step(1);
+    let showWindowsController = gui.add(controls, 'showWindows');
     // Set up L-system event listeners
     randomModeController.onChange(function (mode) {
         console.log(mode);
@@ -2026,6 +2045,8 @@ function main() {
     renderer = new __WEBPACK_IMPORTED_MODULE_7__rendering_gl_OpenGLRenderer__["a" /* default */](canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
     gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
     // Set up event listener for color change
     //colorController.onChange(function (color: Int32Array) {
     //renderer.setGeometryColor(vec4.fromValues(color[0] / 255, color[1] / 255, color[2] / 255, 1));
@@ -2081,6 +2102,7 @@ function main() {
         //renderer.setEdgeClarity(controls.edgeClarity / 100);
         lambert.setPerlinSeed(controls.perlinSeed);
         perlinSeed = controls.perlinSeed;
+        lambert.setShowWindows(controls.showWindows);
         renderer.render(camera, shaders[controls.shader], [
             // icosphere,
             // square,
@@ -5314,7 +5336,7 @@ const myColors = [
     __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].fromValues(0.95, 0.75, 0.75, 1.0),
     __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].fromValues(0.85, 0.85, 0.97, 1.0),
 ];
-class LDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
+class LDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["g" /* GCube */] {
     constructor(stringRepr, position, rotation, scale) {
         super(stringRepr, position, rotation, scale);
         // pick from a few random colors
@@ -5386,7 +5408,7 @@ class LDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
                 roof.scale[0] = top.scale[2];
                 roof.scale[2] = top.scale[0];
             }
-            roof.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["e" /* EDGE_TOP */]] = true;
+            roof.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* EDGE_TOP */]] = true;
             roof.isTerminal = false;
             roof.depth = 4;
             roof.globalRotation = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.globalRotation);
@@ -5394,21 +5416,23 @@ class LDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
             arr[arr.length - 1] = roof;
             return arr;
         }
-        else if (this.depth == 4 && this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["e" /* EDGE_TOP */]]) {
-            this.depth = 5;
-            /*
-            // add chimney with small probability
-            let chimney = new LDCube("chimney", vec3.clone(this.position), vec3.clone(this.rotation), vec3.clone(this.scale));
-            // make chimney square (from top)
-            chimney.scale[0] = Math.min(this.scale[0], this.scale[2]) * 0.4;
-            chimney.scale[2] = chimney.scale[0];
-            // move chimney
-            chimney.position[0] += this.scale[0] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.position[2] += this.scale[2] * 0.3 * (lRandom.getNext() * 2.0 - 1.0);
-            chimney.isTerminal = true;
-            chimney.depth = 5;
-            return [this, chimney];
-            */
+        else if (this.depth == 4) {
+            this.depth += 1;
+            let turnOff = 0;
+            if (p < 0.5) {
+                turnOff = 50;
+            }
+            p = __WEBPACK_IMPORTED_MODULE_1__LRandom__["d" /* lRandom */].getNext();
+            // boost chance of windows at bottom
+            p -= this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["b" /* EDGE_BOT */]] ? 0.2 : 0.0;
+            if (p < 0.3333) {
+                this.sideUVs = [
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 201),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 201),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 200),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 200),
+                ];
+            }
             return [this];
         }
         this.isTerminal = true;
@@ -17463,6 +17487,7 @@ class ShaderProgram {
         this.unifEdgeClarity = __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].getUniformLocation(this.prog, "u_EdgeClarity");
         this.unifSampler0 = __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].getUniformLocation(this.prog, "u_Sampler0");
         this.unifPerlinSeed = __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].getUniformLocation(this.prog, "u_PerlinSeed");
+        this.unifShowWindows = __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].getUniformLocation(this.prog, "u_ShowWindows");
     }
     use() {
         if (activeProgram !== this.prog) {
@@ -17563,6 +17588,12 @@ class ShaderProgram {
         this.use();
         if (this.unifPerlinSeed !== -1) {
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].uniform1f(this.unifPerlinSeed, perlinSeed);
+        }
+    }
+    setShowWindows(showWindows) {
+        this.use();
+        if (this.unifShowWindows !== -1) {
+            __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].uniform1i(this.unifShowWindows, showWindows ? 1 : 0);
         }
     }
     draw(d) {
@@ -18371,7 +18402,7 @@ const myColors = [
     //vec4.fromValues(0.95, 0.75, 0.75, 1.0), // red
     __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].fromValues(0.85, 0.85, 0.97, 1.0),
 ];
-class HDCube extends __WEBPACK_IMPORTED_MODULE_2__GCube__["f" /* GCube */] {
+class HDCube extends __WEBPACK_IMPORTED_MODULE_2__GCube__["g" /* GCube */] {
     constructor(stringRepr, position, rotation, scale) {
         super(stringRepr, position, rotation, scale);
         this.flags = 0;
@@ -18428,10 +18459,10 @@ class HDCube extends __WEBPACK_IMPORTED_MODULE_2__GCube__["f" /* GCube */] {
         }
         else if (this.depth == 1) {
             // add "spike" if top with high chance
-            if (this.isEdge[__WEBPACK_IMPORTED_MODULE_2__GCube__["e" /* EDGE_TOP */]]) {
+            if (this.isEdge[__WEBPACK_IMPORTED_MODULE_2__GCube__["f" /* EDGE_TOP */]]) {
                 if (p < 0.6) {
                     // TODO: add spike 
-                    let spike = new __WEBPACK_IMPORTED_MODULE_2__GCube__["f" /* GCube */]("spike", __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.position), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.rotation), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.scale));
+                    let spike = new __WEBPACK_IMPORTED_MODULE_2__GCube__["g" /* GCube */]("spike", __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.position), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.rotation), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["e" /* vec3 */].clone(this.scale));
                     spike.isTerminal = true;
                     spike.scaleTop = 0.1;
                     spike.scale[0] *= 0.2;
@@ -18469,6 +18500,32 @@ class HDCube extends __WEBPACK_IMPORTED_MODULE_2__GCube__["f" /* GCube */] {
                 arr[i].scale[2] *= scale;
             }
             return arr;
+        }
+        else if (this.depth == 2) {
+            this.depth += 1;
+            const isAlternating = this.flags & HD_BLDG_ALTERNATING;
+            let turnOff = 0;
+            if (isAlternating && p < 0.05) {
+                turnOff = 50;
+            }
+            if (isAlternating) {
+                this.sideUVs = [
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 201),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 201),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 200),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 200),
+                ];
+            }
+            else {
+                // make UV's V huge to make up for fewer subdivisions
+                this.sideUVs = [
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 205),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 205),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(202 + turnOff, 200),
+                    __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 200),
+                ];
+            }
+            return [this];
         }
         this.isTerminal = true;
         return [this];
@@ -18557,7 +18614,7 @@ var Fate;
     Fate[Fate["DELETED"] = 3] = "DELETED";
 })(Fate || (Fate = {}));
 ;
-class MDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
+class MDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["g" /* GCube */] {
     constructor(stringRepr, position, rotation, scale) {
         super(stringRepr, position, rotation, scale);
         this.fate = Fate.TERMINAL;
@@ -18587,7 +18644,7 @@ class MDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
         //return (!this.isTerminal) && (this.isBot || this.isTop);
     }
     isOuterXZ() {
-        return this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["c" /* EDGE_LEFT */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["d" /* EDGE_RIGHT */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["a" /* EDGE_BACK */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["b" /* EDGE_FRONT */]];
+        return this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["d" /* EDGE_LEFT */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["e" /* EDGE_RIGHT */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["a" /* EDGE_BACK */]] || this.isEdge[__WEBPACK_IMPORTED_MODULE_3__GCube__["c" /* EDGE_FRONT */]];
     }
     // p should be in [0, 1]
     expand(p) {
@@ -18686,6 +18743,20 @@ class MDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
             }
             return [this];
         }
+        else if (this.depth == 5) {
+            this.depth += 1;
+            let turnOff = 0;
+            if (p < 0.2) {
+                turnOff = 50;
+            }
+            this.sideUVs = [
+                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(201 + turnOff, 201),
+                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 201),
+                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(201 + turnOff, 200),
+                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec2 */].fromValues(200 + turnOff, 200),
+            ];
+            return [this];
+        }
         this.isTerminal = true;
         return [this];
     }
@@ -18707,7 +18778,7 @@ class MDCube extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
 
 
 // medium density cylinder
-class MDCylinder extends __WEBPACK_IMPORTED_MODULE_1__GCube__["f" /* GCube */] {
+class MDCylinder extends __WEBPACK_IMPORTED_MODULE_1__GCube__["g" /* GCube */] {
     constructor(stringRepr, position, rotation, scale) {
         super(stringRepr, position, rotation, scale);
         this.sides = 8;
@@ -18761,7 +18832,7 @@ const myColors = [
     __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].fromValues(0.01, 0.05, 0.3, 1.0),
     __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["f" /* vec4 */].fromValues(0.01, 0.09, 0.03, 1.0),
 ];
-class LDRoof extends __WEBPACK_IMPORTED_MODULE_3__GCube__["f" /* GCube */] {
+class LDRoof extends __WEBPACK_IMPORTED_MODULE_3__GCube__["g" /* GCube */] {
     constructor(stringRepr, position, rotation, scale) {
         super(stringRepr, position, rotation, scale);
         this.sides = 3;
@@ -18834,7 +18905,7 @@ module.exports = "#version 300 es\r\n\r\n//This is a vertex shader. While it is 
 /* 90 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\r\n\r\n// This is a fragment shader. If you've opened this file first, please\r\n// open and read lambert.vert.glsl before reading on.\r\n// Unlike the vertex shader, the fragment shader actually does compute\r\n// the shading of geometry. For every pixel in your program's output\r\n// screen, the fragment shader is run for every bit of geometry that\r\n// particular pixel overlaps. By implicitly interpolating the position\r\n// data passed into the fragment shader by the vertex shader, the fragment shader\r\n// can compute what color to apply to its pixel based on things like vertex\r\n// position, light position, and vertex color.\r\nprecision highp float;\r\n\r\nuniform vec4 u_Color; // The color with which to render this instance of geometry.\r\n\r\n//uniform sampler2D u_Sampler0;\r\n\r\nuniform vec3 u_LightPos;\r\nuniform float u_PerlinSeed;\r\n\r\n// These are the interpolated values out of the rasterizer, so you can't know\r\n// their specific values without knowing the vertices that contributed to them\r\nin vec4 fs_Pos;\r\nin vec4 fs_Nor;\r\nin vec4 fs_LightVec;\r\nin vec4 fs_Col;\r\nin vec2 fs_UV;\r\n\r\nout vec4 out_Col; // This is the final output color that you will see on your\r\n                  // screen for the pixel that is currently being processed.\r\n\r\n// from Adam's demo\r\nvec2 random2(vec2 p) {\r\n    //vec2 sinVec = sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))));\r\n    //return sinVec * 0.5 + vec2(0.5);\r\n    //return fract(sinVec * 123.45);\r\n    //return fract(sinVec * 43758.5453);\r\n    return normalize(2.0 * fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))))*123.45) - 1.0);\r\n}\r\n\r\nfloat surflet(vec2 P, vec2 gridPoint)\r\n{\r\n    //return (P.x * P.x) * 0.07;\r\n    // Compute falloff function by converting linear distance to a polynomial\r\n    float distX = abs(P.x - gridPoint.x);\r\n    float distY = abs(P.y - gridPoint.y);\r\n    float tX = 1.0 - 6.0 * pow(distX, 5.0) + 15.0 * pow(distX, 4.0) - 10.0 * pow(distX, 3.0);\r\n    float tY = 1.0 - 6.0 * pow(distY, 5.0) + 15.0 * pow(distY, 4.0) - 10.0 * pow(distY, 3.0);\r\n\r\n    // Get the random vector for the grid point\r\n    vec2 gradient = random2(gridPoint);\r\n    // Get the vector from the grid point to P\r\n    vec2 diff = P - gridPoint;\r\n    // Get the value of our height field by dotting grid->P with our gradient\r\n    float height = dot(diff, gradient);\r\n    // Scale our height field (i.e. reduce it) by our polynomial falloff function\r\n    return height * tX * tY;\r\n}\r\n\r\nfloat PerlinNoise(vec2 uv)\r\n{\r\n    // Tile the space\r\n    vec2 uvXLYL = floor(uv);\r\n    vec2 uvXHYL = uvXLYL + vec2(1, 0);\r\n    vec2 uvXHYH = uvXLYL + vec2(1, 1);\r\n    vec2 uvXLYH = uvXLYL + vec2(0, 1);\r\n\r\n    return surflet(uv, uvXLYL) + surflet(uv, uvXHYL) + surflet(uv, uvXHYH) + surflet(uv, uvXLYH);\r\n}\r\n\r\n\r\nfloat normalizedPerlinNoise(vec2 v) {\r\n    return clamp(0.0, 1.0, PerlinNoise(v) + 0.5);\r\n}\r\n\r\n/* FBM (uses Perlin) */\r\nfloat getFBM(vec2 pt, float startFreq) {\r\n    float noiseSum = 0.0;\r\n    float amplitudeSum = 0.0;\r\n    float amplitude = 1.0;\r\n    float frequency = startFreq;\r\n    for (int i = 0; i < 5; i++) {\r\n        float perlin = normalizedPerlinNoise(pt * frequency);\r\n        noiseSum += perlin * amplitude;\r\n        amplitudeSum += amplitude;\r\n        amplitude *= 0.5;\r\n        frequency *= 2.0;\r\n    }\r\n    return noiseSum / amplitudeSum;\r\n}\r\n\r\n// \"normalizes\" coordinate before calling FBM\r\nfloat getFBMFromRawPosition(vec2 pos, float startFreq) {\r\n    vec2 coord = pos / 150.0;\r\n    coord += vec2(3.14, 5.01) + vec2(u_PerlinSeed);\r\n    //return pow(sin(coord.x + coord.y), 2.0);\r\n    return getFBM(coord, startFreq);\r\n}\r\n\r\nvoid main()\r\n{\r\n    // Material base color (before shading)\r\n        vec4 diffuseColor = fs_Col;\r\n        // read texture\r\n        if (fs_UV.x >= 0.0) {\r\n            //diffuseColor = texture(u_Sampler0, fs_UV);\r\n            diffuseColor = vec4(fs_UV, 0.0, 1.0);\r\n        }\r\n\r\n        // Calculate the diffuse term for Lambert shading\r\n        float diffuseTerm = dot(normalize(fs_Nor.xyz), normalize(u_LightPos));\r\n        // Avoid negative lighting values\r\n        diffuseTerm = 0.8 * clamp(diffuseTerm, 0.0, 1.0);\r\n\r\n        float ambientTerm = 0.2;\r\n\r\n        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier\r\n                                                            //to simulate ambient lighting. This ensures that faces that are not\r\n                                                            //lit by our point light are not completely black.\r\n\r\n        // Compute final shaded color\r\n        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);\r\n        // handle ground plane\r\n        if (fs_UV.x > 99.99) {\r\n            float fbm = getFBMFromRawPosition(fs_Pos.xz, 0.5);\r\n            // remap FBM because it's apparently in [0.25, 0.65]\r\n            fbm = (fbm - 0.25) / 0.4;\r\n            float biasedFBM = fbm * 1.5;\r\n            vec3 palette = mix(vec3(0.04, 0.4, 0.12), vec3(0.53, 0.53, 0.53), min(1.0, biasedFBM));\r\n            float fbmAux = getFBMFromRawPosition(fs_Pos.xz + vec2(9.91, -4.33), 0.25);\r\n            fbmAux = min(1.0, (fbmAux - 0.25) / 0.4 + 0.7);\r\n            fbmAux = mix(fbmAux, 1.0, smoothstep(0.6, 1.1, biasedFBM));\r\n            //fbm = pow(fbm, 2.0);\r\n            out_Col = vec4(vec3(fbm), 1);\r\n            float streetiness = smoothstep(0.3, 0.5, biasedFBM);\r\n            vec3 streetColor = palette;\r\n            if ((mod(fs_Pos.x + 3.5, 150.0 / 45.0 * 2.0) < 1.0) ||\r\n                (mod(fs_Pos.z + 3.5, 150.0 / 45.0 * 2.0) < 1.0)) {\r\n                streetColor = vec3(0.1, 0.1, 0.1);\r\n            }\r\n            palette = mix(palette, streetColor, streetiness);\r\n            out_Col = vec4(palette * fbmAux, 1); \r\n            //out_Col = vec4((fs_Pos.xz / 50.0) * 0.5 + vec2(0.5), 0.0, 1.0);\r\n        }\r\n        //out_Col = vec4(fs_Nor.xyz * 0.5 + vec3(0.5), 1.0);\r\n}\r\n"
+module.exports = "#version 300 es\r\n\r\n// This is a fragment shader. If you've opened this file first, please\r\n// open and read lambert.vert.glsl before reading on.\r\n// Unlike the vertex shader, the fragment shader actually does compute\r\n// the shading of geometry. For every pixel in your program's output\r\n// screen, the fragment shader is run for every bit of geometry that\r\n// particular pixel overlaps. By implicitly interpolating the position\r\n// data passed into the fragment shader by the vertex shader, the fragment shader\r\n// can compute what color to apply to its pixel based on things like vertex\r\n// position, light position, and vertex color.\r\nprecision highp float;\r\n\r\nuniform vec4 u_Color; // The color with which to render this instance of geometry.\r\n\r\n//uniform sampler2D u_Sampler0;\r\n\r\nuniform vec3 u_LightPos;\r\nuniform float u_PerlinSeed;\r\nuniform int u_ShowWindows;\r\n\r\n// These are the interpolated values out of the rasterizer, so you can't know\r\n// their specific values without knowing the vertices that contributed to them\r\nin vec4 fs_Pos;\r\nin vec4 fs_Nor;\r\nin vec4 fs_LightVec;\r\nin vec4 fs_Col;\r\nin vec2 fs_UV;\r\n\r\nout vec4 out_Col; // This is the final output color that you will see on your\r\n                  // screen for the pixel that is currently being processed.\r\n\r\n// from Adam's demo\r\nvec2 random2(vec2 p) {\r\n    //vec2 sinVec = sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))));\r\n    //return sinVec * 0.5 + vec2(0.5);\r\n    //return fract(sinVec * 123.45);\r\n    //return fract(sinVec * 43758.5453);\r\n    return normalize(2.0 * fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))))*123.45) - 1.0);\r\n}\r\n\r\nfloat surflet(vec2 P, vec2 gridPoint)\r\n{\r\n    //return (P.x * P.x) * 0.07;\r\n    // Compute falloff function by converting linear distance to a polynomial\r\n    float distX = abs(P.x - gridPoint.x);\r\n    float distY = abs(P.y - gridPoint.y);\r\n    float tX = 1.0 - 6.0 * pow(distX, 5.0) + 15.0 * pow(distX, 4.0) - 10.0 * pow(distX, 3.0);\r\n    float tY = 1.0 - 6.0 * pow(distY, 5.0) + 15.0 * pow(distY, 4.0) - 10.0 * pow(distY, 3.0);\r\n\r\n    // Get the random vector for the grid point\r\n    vec2 gradient = random2(gridPoint);\r\n    // Get the vector from the grid point to P\r\n    vec2 diff = P - gridPoint;\r\n    // Get the value of our height field by dotting grid->P with our gradient\r\n    float height = dot(diff, gradient);\r\n    // Scale our height field (i.e. reduce it) by our polynomial falloff function\r\n    return height * tX * tY;\r\n}\r\n\r\nfloat PerlinNoise(vec2 uv)\r\n{\r\n    // Tile the space\r\n    vec2 uvXLYL = floor(uv);\r\n    vec2 uvXHYL = uvXLYL + vec2(1, 0);\r\n    vec2 uvXHYH = uvXLYL + vec2(1, 1);\r\n    vec2 uvXLYH = uvXLYL + vec2(0, 1);\r\n\r\n    return surflet(uv, uvXLYL) + surflet(uv, uvXHYL) + surflet(uv, uvXHYH) + surflet(uv, uvXLYH);\r\n}\r\n\r\n\r\nfloat normalizedPerlinNoise(vec2 v) {\r\n    return clamp(0.0, 1.0, PerlinNoise(v) + 0.5);\r\n}\r\n\r\n/* FBM (uses Perlin) */\r\nfloat getFBM(vec2 pt, float startFreq) {\r\n    float noiseSum = 0.0;\r\n    float amplitudeSum = 0.0;\r\n    float amplitude = 1.0;\r\n    float frequency = startFreq;\r\n    for (int i = 0; i < 5; i++) {\r\n        float perlin = normalizedPerlinNoise(pt * frequency);\r\n        noiseSum += perlin * amplitude;\r\n        amplitudeSum += amplitude;\r\n        amplitude *= 0.5;\r\n        frequency *= 2.0;\r\n    }\r\n    return noiseSum / amplitudeSum;\r\n}\r\n\r\n// \"normalizes\" coordinate before calling FBM\r\nfloat getFBMFromRawPosition(vec2 pos, float startFreq) {\r\n    vec2 coord = pos / 150.0;\r\n    coord += vec2(3.14, 5.01) + vec2(u_PerlinSeed);\r\n    //return pow(sin(coord.x + coord.y), 2.0);\r\n    return getFBM(coord, startFreq);\r\n}\r\n\r\nvoid main()\r\n{\r\n    // Material base color (before shading)\r\n        vec4 diffuseColor = fs_Col;\r\n        // read texture\r\n        if (fs_UV.x >= 0.0 && fs_UV.x < 2.0) { \r\n            //diffuseColor = texture(u_Sampler0, fs_UV);\r\n            diffuseColor = vec4(fs_UV, 0.0, 1.0);\r\n        }\r\n\r\n        // Calculate the diffuse term for Lambert shading\r\n        float diffuseTerm = dot(normalize(fs_Nor.xyz), normalize(u_LightPos));\r\n        // Avoid negative lighting values\r\n        diffuseTerm = 0.8 * clamp(diffuseTerm, 0.0, 1.0);\r\n\r\n        float ambientTerm = 0.2;\r\n\r\n        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier\r\n                                                            //to simulate ambient lighting. This ensures that faces that are not\r\n                                                            //lit by our point light are not completely black.\r\n\r\n        // Compute final shaded color\r\n        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);\r\n        // handle windows\r\n        if (fs_UV.x > 199.99) {\r\n            if (u_ShowWindows > 0) {\r\n                vec2 uv = fs_UV - vec2(200.0);\r\n                vec2 modUV = fract(uv);\r\n                if (0.35 < modUV.x && modUV.x < 0.65 && 0.35 < modUV.y && modUV.y < 0.65) {\r\n                    if (fs_UV.x > 249.99) {\r\n                        out_Col = vec4(0.3, 0.3, 0.3, 1);\r\n                    }\r\n                    else {\r\n                        out_Col = vec4(1, 1, 0.85, 1);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        // handle ground plane\r\n        else if (fs_UV.x > 99.99) {\r\n            float fbm = getFBMFromRawPosition(fs_Pos.xz, 0.5);\r\n            // remap FBM because it's apparently in [0.25, 0.65]\r\n            fbm = (fbm - 0.25) / 0.4;\r\n            float biasedFBM = fbm * 1.5;\r\n            vec3 palette = mix(vec3(0.04, 0.4, 0.12), vec3(0.53, 0.53, 0.53), min(1.0, biasedFBM));\r\n            float fbmAux = getFBMFromRawPosition(fs_Pos.xz + vec2(9.91, -4.33), 0.25);\r\n            fbmAux = min(1.0, (fbmAux - 0.25) / 0.4 + 0.7);\r\n            fbmAux = mix(fbmAux, 1.0, smoothstep(0.6, 1.1, biasedFBM));\r\n            //fbm = pow(fbm, 2.0);\r\n            out_Col = vec4(vec3(fbm), 1);\r\n            float streetiness = smoothstep(0.3, 0.5, biasedFBM);\r\n            vec3 streetColor = palette;\r\n            if ((mod(fs_Pos.x + 3.5, 150.0 / 45.0 * 2.0) < 1.0) ||\r\n                (mod(fs_Pos.z + 3.5, 150.0 / 45.0 * 2.0) < 1.0)) {\r\n                streetColor = vec3(0.1, 0.1, 0.1);\r\n            }\r\n            palette = mix(palette, streetColor, streetiness);\r\n            out_Col = vec4(palette * fbmAux, 1); \r\n            //out_Col = vec4((fs_Pos.xz / 50.0) * 0.5 + vec2(0.5), 0.0, 1.0);\r\n        }\r\n        //out_Col = vec4(fs_Nor.xyz * 0.5 + vec3(0.5), 1.0);\r\n}\r\n"
 
 /***/ }),
 /* 91 */
