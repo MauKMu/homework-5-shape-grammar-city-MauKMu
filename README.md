@@ -16,7 +16,7 @@ Click below to go to the demo!
 
 * Move camera to desired position.
 * Toggle `useDebugColor` if you want a more colorful experience.
-* Click on `Iterate` five times (after the second one, iterations may be a bit slow).
+* Click on `Iterate` six times (after the second one, iterations may be a bit slow).
 * Enjoy.
 * You can modify the `perlinSeed`, click on `Regenerate City`, then iterate five times again if you want to see the city built on a different population density distribution.
 
@@ -32,6 +32,7 @@ Below is an explanation of how to use the controls in the demo. A similar explan
 * `Regenerate City`: Regenerates shape grammar string, re-expands it, then redraws city.
 * `Redraw City`: Redraws city without modifying shape grammar string. Note that if your `randomMode` is `Math.random()`, you will get different results, although the general structure of the city will still be the same. Similarly, using the seeded noise function and changing the seed will lead to different results.
 * `Show Help`: Shows a help message.
+* `showWindows`: Toggles rendering windows on buildings.
 
 If you change the Perlin seed, you will modify the general structure of the city (this will modify the population density distribution). Redrawing the city without changing the Perlin seed will only lead to small changes local to each building.
 
@@ -50,6 +51,8 @@ There are three types of building: low, medium, and high-density buildings. The 
 Note each symbol stores how many times it has been expanded, which is how the symbols know whether they are on the first iteration, or the second one, etc. Each symbol also keeps track of whether it's part of the edges of the building (i.e. whether it lies on the faces of the original undivided cube).
 
 Each symbol also stores other useful information, like position, rotation, scale, as well as more specific values in each subclass.
+
+Also note that each of "Cube" shapes will attempt to add windows to itself (they are 2D windows achieved through UV hacks) after their last iteration listed below, if they reach it.
 
 * `LDCube`: Base for low-density buildings. A cube.
   * For the first two iterations, will subdivide itself into smaller `LDCubes` in the X and Z directions. Each subdivision will be in a different direction, but which one happens first (X or Z) is random.
@@ -101,6 +104,10 @@ High-density (from top):
 High-density (from bottom):
 
 ![](images/hi-density-bot.PNG)
+
+Buildings with windows:
+
+![](images/windows.png)
 
 ### Building Layout
 
