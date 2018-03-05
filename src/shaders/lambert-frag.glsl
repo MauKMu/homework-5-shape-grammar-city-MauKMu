@@ -102,7 +102,7 @@ void main()
     // Material base color (before shading)
         vec4 diffuseColor = fs_Col;
         // read texture
-        if (fs_UV.x >= 0.0) {
+        if (fs_UV.x >= 0.0 && fs_UV.x < 2.0) { 
             //diffuseColor = texture(u_Sampler0, fs_UV);
             diffuseColor = vec4(fs_UV, 0.0, 1.0);
         }
@@ -120,8 +120,16 @@ void main()
 
         // Compute final shaded color
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        // handle windows
+        if (fs_UV.x > 199.99) {
+            vec2 uv = fs_UV - vec2(200.0);
+            vec2 modUV = fract(uv);
+            if (0.3 < modUV.x && modUV.x < 0.7 && 0.3 < modUV.y && modUV.y < 0.7) {
+                out_Col = vec4(1, 1, 0.5, 1);
+            }
+        }
         // handle ground plane
-        if (fs_UV.x > 99.99) {
+        else if (fs_UV.x > 99.99) {
             float fbm = getFBMFromRawPosition(fs_Pos.xz, 0.5);
             // remap FBM because it's apparently in [0.25, 0.65]
             fbm = (fbm - 0.25) / 0.4;

@@ -1,4 +1,4 @@
-import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
+import {vec2, vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
@@ -162,6 +162,16 @@ export class MDCube extends GCube {
                 this.isTerminal = true;
                 this.action = function (lsys: LSystem) { };
             }
+            return [this];
+        }
+        else if (this.depth == 5) {
+            this.depth += 1;
+            this.sideUVs = [
+                vec2.fromValues(201, 201), // top-right
+                vec2.fromValues(200, 201), // top-left
+                vec2.fromValues(201, 200), // bottom-right
+                vec2.fromValues(200, 200), // bottom-left
+            ];
             return [this];
         }
         this.isTerminal = true;

@@ -1,4 +1,4 @@
-import {vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
+import {vec2, vec3, vec4, mat3, mat4, quat} from 'gl-matrix';
 import LSystem from 'LSystem';
 import {lRandom} from './LRandom';
 import {INV_PRISM_HEIGHT} from '../geometry/Plant';
@@ -37,6 +37,8 @@ export class GCube extends GSymbol {
     globalRotation: vec3;
     globalTranslation: vec3;
 
+    sideUVs: Array<vec2>;
+
     constructor(stringRepr: string, position: vec3, rotation: vec3, scale: vec3) {
         super(stringRepr, position, rotation, scale, GShape.CUBE);
         this.globalRotation = vec3.create();
@@ -52,6 +54,7 @@ export class GCube extends GSymbol {
         this.scaleTop = 1;
         this.subdivMustBeOdd = false;
         this.subdivMustBeEven = false;
+        this.sideUVs = [];
 
         this.toUnitCube = mat4.create();
         let toUnitCubeQuat = quat.create();
@@ -68,6 +71,7 @@ export class GCube extends GSymbol {
 
             mat4.multiply(m, m, this.toUnitCube);
             lsys.plant.useColor(this.getColor());
+            lsys.plant.useSideUVs(this.sideUVs);
             // also scale into unit cube
             //lsys.plant.addPrism(m, 4, INV_SQRT_TWO, INV_SQRT_TWO, INV_PRISM_HEIGHT);
             //lsys.plant.addPrism(m, 4, 1, 1, 1);

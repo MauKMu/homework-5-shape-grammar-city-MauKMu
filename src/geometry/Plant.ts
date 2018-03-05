@@ -63,6 +63,7 @@ class Plant extends Drawable {
     wasSafe: boolean;
 
     currColor: vec4;
+    currSideUVs: Array<vec2>;
 
     constructor(center: vec3) {
         super(); // Call the constructor of the super class. This is required.
@@ -80,6 +81,8 @@ class Plant extends Drawable {
         vec4.copy(this.currColor, BRANCH_COLOR);
 
         this.wasSafe = true;
+
+        this.currSideUVs = [];
     }
 
     isSafeToGrow(): boolean {
@@ -103,6 +106,23 @@ class Plant extends Drawable {
     useColor(color: vec4) {
         vec4.copy(this.currColor, color);
     }
+
+    useSideUVs(sideUVs: Array<vec2>) {
+        this.currSideUVs = [];
+        sideUVs.forEach(function (value: vec2) {
+            this.currSideUVs.push(vec2.clone(value));
+        }, this);
+    }
+
+    appendSideUVsToArray(arr: Array<number>, defaultUV: vec2, idx: number) {
+        if (this.currSideUVs.length > idx) {
+            appendVec2ToArray(this.stagedUVs, vec2.clone(this.currSideUVs[idx]));
+        }
+        else {
+            appendVec2ToArray(this.stagedUVs, defaultUV);
+        }
+    }
+
 
     // hardcoded XZ plane
     addPlane(dims: vec2) {
@@ -453,20 +473,20 @@ class Plant extends Drawable {
             vec4.transformMat4(p, localPosTop, transform);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, vec2.fromValues(-1, -1), 0);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, vec2.fromValues(-1, -1), 1);
 
             // transform and append position -- bottom
             //vec4.set(localPosBot, localPosTop[0], 0, localPosTop[2], 1);
             vec4.transformMat4(p, localPosBot, transform);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, vec2.fromValues(-1, -1), 2);
             appendVec4ToArray(this.stagedPositions, p);
             appendVec4ToArray(this.stagedColors, this.currColor);
-            appendVec2ToArray(this.stagedUVs, vec2.fromValues(-1, -1));
+            this.appendSideUVsToArray(this.stagedUVs, vec2.fromValues(-1, -1), 3);
 
             // transform and append normal (need to append twice)
             vec3.transformMat3(n, localNor, invTr);
