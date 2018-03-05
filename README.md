@@ -16,7 +16,7 @@ Click below to go to the demo!
 
 * Move camera to desired position.
 * Toggle `useDebugColor` if you want a more colorful experience.
-* Click on `Iterate` six times (after the second one, iterations may be a bit slow).
+* Click on `Iterate` six times (after the second one, iterations may be a bit slow). You will know when to stop once all types of buildings have bright windows on them.
 * Enjoy.
 * You can modify the `perlinSeed`, click on `Regenerate City`, then iterate five times again if you want to see the city built on a different population density distribution.
 
@@ -52,12 +52,13 @@ Note each symbol stores how many times it has been expanded, which is how the sy
 
 Each symbol also stores other useful information, like position, rotation, scale, as well as more specific values in each subclass.
 
-Also note that each of "Cube" shapes will attempt to add windows to itself (they are 2D windows achieved through UV hacks) after their last iteration listed below, if they reach it.
+When a symbol adds windows to itself, it essentially gives itself different UVs. Note that each symbol with windows will have a small chance to have dark windows instead of the default bright windows. This chance varies across `LDCube`, `MDCube`, and `HDCube`.
 
 * `LDCube`: Base for low-density buildings. A cube.
   * For the first two iterations, will subdivide itself into smaller `LDCubes` in the X and Z directions. Each subdivision will be in a different direction, but which one happens first (X or Z) is random.
   * For the third iteration, will delete itself with a small chance. 
   * For the fourth iteration, will subdivide along Y once and transform the topmost `LDCube` into an `LDRoof`. After this, all `LDCubes` become terminal.
+  * For the fifth iteration. will add windows to itself with low probability, or moderate probability if this is a "bottom" block. Windows are dark half of the time.
 * `LDRoof`: A roof for low-density buildings. A triangular prism.
   * For the first iteration, has a small chance to add a chimney (small scaled cube). After this, becomes terminal.
 * `MDCube`: Base for medium-density buildings. A cube.
@@ -73,6 +74,7 @@ Also note that each of "Cube" shapes will attempt to add windows to itself (they
       * Scale every other sub-block (along Y) in order to create some "texture".
   * For the fourth iteration, if this block is marked as a column, replace itself with an `MDCylinder`.
   * For the fifth iteration, if this block is marked as deleted, delete itself.
+  * For the sixth iteration, will add windows to itself. Windows are occasionally dark.
 * `MDCylinder`: A column used in medium-density buildings. An octagonal prism.
     * This is a terminal symbol.
 * `HDCube`: Base for high-density buildings. Initially a cube; may become an octagonal prism.
@@ -86,8 +88,11 @@ Also note that each of "Cube" shapes will attempt to add windows to itself (they
       * Else, if this is an "alternating" building:
         * Subdivide itself along Y such that an odd number of sub-blocks is generated, including the original block.
         * Scale every other block in order to create some "texture".
+    * For the third iteration, will add windows to itself. Windows are rarely dark.
 
 ### Building Shape Grammar - Examples
+
+Note that the images below, except for the last one, show buildings without windows.
 
 Low-density:
 
@@ -134,7 +139,7 @@ Here is the process used to place buildings on the scene:
 ### Building Colors
 
 * If using "debug" colors:
-  * Low-density buildings are blue.
+  * Low-density buildings are blue. (The roofs are pink -- this is also a "debugging feature".)
   * Medium-density buildings are green.
   * High-density buildings are red.
   * As a symbol subdivides itself, it will darken its color, with sub-blocks farther from the original block being darker.
